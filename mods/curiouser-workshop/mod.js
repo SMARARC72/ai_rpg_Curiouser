@@ -291,7 +291,8 @@ module.exports.register = function register(scope) {
       structures: STRUCTURES.map(s => ({ id: s.id, name: s.name, ink: s.ink, parts: s.parts, description: s.description,
         buildable: p ? (inkOf(p) >= s.ink && partsCan(s.parts)) : false })),
       vault: state.vault.map((v, i) => ({ index: i, name: v.name, rarity: v.rarity || (v.metadata && v.metadata.rarity) || 'common' })),
-      vaultSlots: stationLevel('vault') * 4
+      vaultSlots: stationLevel('vault') * 4,
+      inventory: p ? inventoryItems(p).map(t => ({ id: t.id, name: t.name, rarity: itemRarity(t), value: itemValue(t) })) : []
     };
   }
 

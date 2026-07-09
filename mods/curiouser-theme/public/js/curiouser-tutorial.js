@@ -44,6 +44,10 @@
         "Each <b>Episode</b> sets a Ratings bar: clear it to be <b>Renewed</b>, miss it twice and you're <b>Cancelled</b> (it burns Legacy, but you can be rebooted). <b>Sponsors</b> offer Ink with a catch — take the deal or stay pure and broke."
     },
     {
+      title: 'The Prop Department',
+      html: "See the <b>🔧 Prop Shop</b> button (bottom-left)? That's your workshop. <b>Salvage</b> loot into parts, <b>Craft</b> gear from recipes or wild <b>experiments</b>, <b>Build</b> barricades and traps into the scene, and upgrade your <b>Green Room</b> base — including a <b>Prop Vault</b> that keeps your best props even if you're Cancelled."
+    },
+    {
       title: 'Roll the cameras',
       html: "Hit <b>New Game</b> in the top bar to spin up your first world and step into the lights. You can reopen this guide any time from the <b>🎙️ How to Play</b> button in the corner.<br><br>Break a leg. You'll need to.",
       cta: { label: '🎬 Start New Game', href: '/new-game' }
