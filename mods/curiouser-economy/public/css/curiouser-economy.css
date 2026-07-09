@@ -25,6 +25,8 @@
 .curiouser-beat--sponsor { border-left-color: var(--cur-blue, #2664e6) !important; }
 .curiouser-beat--episode,
 .curiouser-beat--stakes { border-left-color: var(--cur-ink, #17130d) !important; }
+.curiouser-beat--houserule { border-left-color: #e08a1a !important; }
+.curiouser-beat--houserule .message-sender { color: #b56a08 !important; }
 
 /* Sponsor break: the one beat the player answers directly. */
 .curiouser-sponsor-actions {

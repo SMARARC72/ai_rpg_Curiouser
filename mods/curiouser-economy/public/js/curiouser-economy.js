@@ -41,10 +41,11 @@
     try { console.log.apply(console, ['[curiouser-economy]'].concat([].slice.call(arguments))); } catch (e) {}
   }
 
-  function api(routePath, method) {
+  function api(routePath, method, body) {
     return fetch(BASE + routePath, {
       method: method || 'POST',
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
     }).then(function (res) {
       if (!res.ok) return null;
       return res.json().catch(function () { return null; });
@@ -52,6 +53,15 @@
   }
 
   function chatLog() { return document.getElementById('chatLog'); }
+
+  // The player's most recent action text (for House-Rule enforcement).
+  function lastPlayerMessage() {
+    var nodes = document.querySelectorAll('.message.user-message');
+    if (!nodes.length) return '';
+    var last = nodes[nodes.length - 1];
+    var body = last.querySelector('div:not(.message-sender):not(.message-timestamp):not(.message-actions)');
+    return (body ? body.textContent : last.textContent) || '';
+  }
 
   // Render a Host beat as an on-air interruption in the chat.
   function renderBeat(text, kind) {
@@ -207,6 +217,11 @@
         }
         bootstrapped = true;
         turnsThisEpisode += 1;
+        // This Episode's House Rule bites off your own action text, every turn
+        // it triggers (independent of the gated side-beat below).
+        api('/houserule/enforce', 'POST', { playerMessage: lastPlayerMessage() }).then(function (hr) {
+          if (hr && hr.host) renderBeat(hr.host, 'houserule');
+        });
         if (turnsThisEpisode >= EPISODE_LENGTH) {
           return runRenewalCheck();
         }
