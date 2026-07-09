@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "An AI-powered RPG game server",
   "main": "server.js",
+  "engines": {
+    "node": ">=20.18.1"
+  },
   "scripts": {
     "start": "node scripts/railway-start.mjs",
     "start:server": "node server.js",
