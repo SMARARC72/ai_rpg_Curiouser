@@ -289,6 +289,16 @@ module.exports.register = function register(scope) {
     });
   }
 
+  // A caption-card panel image (comic-cream tint), used when no scene art is
+  // available so the comic works without an image backend.
+  async function placeholderBuffer() {
+    const sharp = getSharp();
+    const ps = panelSettings();
+    const tints = [{ r: 244, g: 234, b: 211 }, { r: 255, g: 229, b: 180 }, { r: 219, g: 232, b: 255 }, { r: 217, g: 242, b: 223 }];
+    const t = tints[Math.floor(Math.random() * tints.length)];
+    return sharp({ create: { width: ps.panelWidth * 2, height: ps.panelHeight * 2, channels: 4, background: { r: t.r, g: t.g, b: t.b, alpha: 1 } } }).png().toBuffer();
+  }
+
   function requireGame(res) {
     if (!scope.currentPlayer) { res.status(409).json({ success: false, error: 'No active game.' }); return false; }
     return true;
@@ -303,7 +313,7 @@ module.exports.register = function register(scope) {
   registerModRoute('post', '/panel', (req, res) => {
     if (!requireGame(res)) return;
     const { caption = '', dialogue = [], imagePrompt = '', imageUrl = '' } = req.body || {};
-    if (!imagePrompt && !imageUrl) return res.status(400).json({ success: false, error: 'panel needs an imagePrompt or an imageUrl' });
+    if (!imagePrompt && !imageUrl && !caption) return res.status(400).json({ success: false, error: 'panel needs a caption, imagePrompt, or imageUrl' });
     const beat = { id: `beat_${state.pendingBeats.length + 1}_${Math.floor(Date.now() / 1000)}`, caption, dialogue, imagePrompt, imageUrl };
     state.pendingBeats.push(beat);
     saveState(state);
@@ -318,10 +328,13 @@ module.exports.register = function register(scope) {
     try {
       const panels = [];
       for (const beat of beats) {
-        let imgPath = beat.imageUrl ? urlToPath(beat.imageUrl) : null;
-        if ((!imgPath || !fs.existsSync(imgPath)) && beat.imagePrompt) imgPath = await generatePanelImage(beat.imagePrompt);
-        if (!imgPath || !fs.existsSync(imgPath)) throw new Error(`beat ${beat.id} has no usable image`);
-        panels.push({ image: imgPath, caption: beat.caption, dialogue: beat.dialogue });
+        let imageInput = beat.imageUrl ? urlToPath(beat.imageUrl) : null;
+        if (imageInput && !fs.existsSync(imageInput)) imageInput = null;
+        if (!imageInput && beat.imagePrompt && scope.config && scope.config.imagegen && scope.config.imagegen.enabled) {
+          try { imageInput = await generatePanelImage(beat.imagePrompt); } catch (e) { imageInput = null; }
+        }
+        if (!imageInput) imageInput = await placeholderBuffer(); // caption-card fallback (no image backend)
+        panels.push({ image: imageInput, caption: beat.caption, dialogue: beat.dialogue });
       }
       const pageBuf = await composePage(panels, panelSettings());
       if (!fs.existsSync(generatedDir)) fs.mkdirSync(generatedDir, { recursive: true });
@@ -349,7 +362,10 @@ module.exports.register = function register(scope) {
       const fname = `chapter_${Math.floor(Date.now() / 1000)}.html`;
       const outPath = path.join(exportsDir, fname);
       fs.writeFileSync(outPath, html);
-      res.json({ success: true, path: outPath, pages: state.pages.length });
+      // Also write into the served generated-images dir so the player can open it.
+      if (!fs.existsSync(generatedDir)) fs.mkdirSync(generatedDir, { recursive: true });
+      fs.writeFileSync(path.join(generatedDir, fname), html);
+      res.json({ success: true, path: outPath, url: `/generated-images/${fname}`, pages: state.pages.length });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }

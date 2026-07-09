@@ -363,6 +363,8 @@ mods:
     enabled: true
   curiouser-segments:
     enabled: true
+  curiouser-director:
+    enabled: true
   # sceneIllustration:
   #   additional_instructions:
 
