@@ -4,7 +4,8 @@
   "description": "An AI-powered RPG game server",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node scripts/railway-start.mjs",
+    "start:server": "node server.js",
     "dev": "node server.js",
     "scss:build:main": "sass public/css/main.scss public/css/main.css",
     "scss:build:settings": "sass public/css/settings.scss public/css/settings.css",
