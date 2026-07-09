@@ -357,6 +357,8 @@ mods:
     enabled: true
   curiouser-workshop:
     enabled: true
+  curiouser-ensemble:
+    enabled: true
   # sceneIllustration:
   #   additional_instructions:
 

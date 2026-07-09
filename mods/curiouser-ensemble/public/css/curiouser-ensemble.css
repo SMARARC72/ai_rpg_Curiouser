@@ -1,0 +1,12 @@
+/*
+ * Curiouser Ensemble — living-world beat marker. World beats render as Host
+ * (ai-message) bubbles with a distinct purple left rule so they read as the
+ * set moving around you, separate from the Host's direct narration and the
+ * economy/workshop beats.
+ */
+.world-beat {
+  border-left: 7px solid var(--cur-pink, #7a3ff2) !important;
+}
+.world-beat .message-sender {
+  color: #7a3ff2 !important;
+}
