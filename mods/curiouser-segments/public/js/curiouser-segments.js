@@ -53,9 +53,8 @@
   function open() { if (!overlay) build(); overlay.style.display = 'flex'; api('/state', 'GET').then(function (s) { renderSeg(s && s.segment); }); }
   function hide() { if (overlay) overlay.style.display = 'none'; }
   function addButton() {
-    if (document.getElementById('sgReopen')) return;
-    var b = document.createElement('button'); b.id = 'sgReopen'; b.className = 'sg-reopen'; b.type = 'button';
-    b.textContent = '🎬 Segment'; b.addEventListener('click', open); document.body.appendChild(b);
+    (window.__CUR_DOCK__ = window.__CUR_DOCK__ || []).push({ icon: '🎯', label: 'Segment', onClick: open });
+    if (window.__CUR_DOCK_RENDER__) window.__CUR_DOCK_RENDER__();
   }
 
   function onTurn() {

@@ -39,5 +39,5 @@
 .curiouser-sponsor-take { background: var(--cur-yellow, #ffd23f) !important; }
 .curiouser-sponsor-pass { background: var(--cur-paper-3, #efe1c2) !important; }
 .curiouser-sponsor-actions.is-resolved { opacity: 0.55; }
-.curiouser-sponsor-btn:disabled { cursor: default; transform: none !important; box-shadow: 2px 2px 0 var(--cur-ink, #17130d) !important; }
+.curiouser-sponsor-btn:disabled { cursor: default; transform: none !important; box-shadow: 0 2px 8px rgba(20,20,26,0.14) !important; }
 .curiouser-sponsor-result { margin-top: 8px; font-style: italic; }

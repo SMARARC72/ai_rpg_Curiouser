@@ -93,9 +93,8 @@
   function open() { if (!overlay) build(); overlay.style.display = 'flex'; refresh(); }
   function hide() { if (overlay) overlay.style.display = 'none'; }
   function addButton() {
-    if (document.getElementById('drReopen')) return;
-    var b = document.createElement('button'); b.id = 'drReopen'; b.className = 'dr-reopen'; b.type = 'button';
-    b.textContent = '📖 Comic'; b.addEventListener('click', open); document.body.appendChild(b);
+    (window.__CUR_DOCK__ = window.__CUR_DOCK__ || []).push({ icon: '📖', label: 'Comic', onClick: open });
+    if (window.__CUR_DOCK_RENDER__) window.__CUR_DOCK_RENDER__();
   }
 
   // ---- auto-capture the big stakes beats ----

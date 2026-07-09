@@ -1,73 +1,80 @@
 /*
- * Curiouser — Comic-book / Ink theme.
+ * Curiouser — Modern comic theme ("Invincible / Deadpool" energy).
  * ------------------------------------------------------------------------
- * A single CSS overlay, injected (last) into EVERY page's <head> by the mod
- * system, that restyles the stock ai_rpg UI — a dark purple "glass" theme —
- * into a printed comic page: cream paper with a halftone wash, heavy black
- * ink borders with hard offset shadows, a comic display face for headings and
- * controls, and speech-bubble chat panels.
+ * A CSS overlay injected (last) into every page. It restyles the stock dark
+ * ai_rpg UI into a sleek modern comic book: crisp light page, bold black ink
+ * panel borders, a heavy condensed display face, saturated red/blue/gold on
+ * clean white cards, and soft depth instead of vintage halftone/sticker shadows.
  *
- * The base stylesheet (main.css) is compiled from SCSS, so its colors are
- * baked-in literals (not CSS variables) — there is no token layer to swap.
- * We therefore restyle concrete selectors directly, and use !important where
- * the base rule is a two-class compound (.btn.btn-primary, .message.ai-message)
- * or ships its own !important. Class names are taken from the live markup.
- *
- * Pure theming — no DOM changes. Disable the mod to revert.
+ * Most Curiouser panels read the --cur-* tokens below, so updating this palette
+ * propagates the look across the whole app. !important is used to win over the
+ * compiled base rules.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --cur-ink: #17130d;
-  --cur-ink-soft: rgba(23, 19, 13, 0.66);
-  --cur-paper: #f4ead3;
-  --cur-paper-2: #fbf5e6;
-  --cur-paper-3: #efe1c2;
-  --cur-red: #e5322b;
-  --cur-blue: #2664e6;
-  --cur-blue-soft: #dbe8ff;
-  --cur-yellow: #ffd23f;
-  --cur-green: #3fb562;
-  --cur-pink: #ff5da2;
-  --cur-border: 3px solid var(--cur-ink);
-  --cur-border-2: 2px solid var(--cur-ink);
-  --cur-hard: 6px 6px 0 var(--cur-ink);
-  --cur-hard-sm: 4px 4px 0 var(--cur-ink);
-  --cur-hard-xs: 2px 2px 0 var(--cur-ink);
-  --cur-radius: 10px;
-  --cur-display: 'Bangers', 'Arial Black', 'Segoe UI', system-ui, sans-serif;
-  --cur-body: 'Comic Neue', 'Segoe UI', system-ui, sans-serif;
+  --cur-ink: #14141a;
+  --cur-ink-2: #232330;
+  --cur-ink-soft: rgba(20, 20, 26, 0.56);
+  --cur-paper: #ececed;          /* page background */
+  --cur-paper-2: #ffffff;        /* cards / panels  */
+  --cur-paper-3: #e7e7ea;        /* secondary fill  */
+  --cur-line: #14141a;
+  --cur-red: #e11d2a;            /* Deadpool red (primary) */
+  --cur-red-2: #b91320;
+  --cur-blue: #1f6feb;           /* Invincible blue */
+  --cur-blue-soft: #e6efff;
+  --cur-yellow: #ffc21a;
+  --cur-green: #22a559;
+  --cur-pink: #ff3d7f;
+  --cur-purple: #7a3ff2;
 
-  /* The only real CSS vars in the base — recolor all modal chrome cheaply. */
-  --airpg-modal-backdrop: rgba(23, 19, 13, 0.55);
+  --cur-border: 2.5px solid var(--cur-ink);
+  --cur-border-2: 2px solid var(--cur-ink);
+  --cur-radius: 10px;
+  --cur-radius-sm: 8px;
+
+  --cur-shadow-sm: 0 2px 8px rgba(20, 20, 26, 0.14);
+  --cur-shadow-md: 0 6px 18px rgba(20, 20, 26, 0.20);
+  --cur-shadow-lg: 0 14px 34px rgba(20, 20, 26, 0.26);
+  /* Legacy names the base UI references — remapped to sleek soft depth. */
+  --cur-hard: var(--cur-shadow-lg);
+  --cur-hard-sm: var(--cur-shadow-md);
+  --cur-hard-xs: var(--cur-shadow-sm);
+
+  --cur-display: 'Anton', 'Impact', 'Arial Narrow', 'Haettenschweiler', system-ui, sans-serif;
+  --cur-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Base modal tokens -> clean modern comic. */
+  --airpg-modal-backdrop: rgba(20, 20, 26, 0.55);
   --airpg-modal-surface: var(--cur-paper-2);
   --airpg-modal-border: var(--cur-ink);
-  --airpg-modal-shadow: var(--cur-hard);
-  --airpg-modal-header: var(--cur-yellow);
+  --airpg-modal-shadow: var(--cur-shadow-lg);
+  --airpg-modal-header: var(--cur-ink);
   --airpg-modal-text: var(--cur-ink);
   --airpg-modal-muted: var(--cur-ink-soft);
 }
 
 /* ============================================================ *
- * 1. Page canvas — paper + halftone, everywhere
+ * 1. Page canvas
  * ============================================================ */
 html, body {
   background-color: var(--cur-paper) !important;
   background-image:
-    radial-gradient(rgba(23, 19, 13, 0.08) 1px, transparent 1.7px) !important;
-  background-size: 15px 15px !important;
+    radial-gradient(rgba(20, 20, 26, 0.035) 1px, transparent 1.4px) !important;
+  background-size: 22px 22px !important;
   color: var(--cur-ink) !important;
   font-family: var(--cur-body) !important;
+  -webkit-font-smoothing: antialiased;
 }
-/* new-game page paints a translucent-white .page-section over a body override */
-body.new-game-page { background-attachment: fixed; }
+body { font-weight: 400; letter-spacing: 0.1px; }
 
 p, span, div, li, td, th, label, small, strong, em, dd, dt,
 h1, h2, h3, h4, h5, h6, figcaption, summary, legend, caption {
   color: var(--cur-ink);
 }
-a { color: var(--cur-blue); text-decoration: none; }
+a { color: var(--cur-red); text-decoration: none; font-weight: 600; }
 a:hover { text-decoration: underline; }
 
 /* ---- Display type ---- */
@@ -80,31 +87,36 @@ h1, h2, h3, h4,
 .popup-card__title {
   font-family: var(--cur-display) !important;
   font-weight: 400;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
 }
-h1 { font-size: 2.5rem; line-height: 1.05; }
-h2 { font-size: 1.85rem; }
-h3 { font-size: 1.45rem; }
-h4 { font-size: 1.2rem; }
+h1 { font-size: 2.6rem; line-height: 1; }
+h2 { font-size: 1.9rem; }
+h3 { font-size: 1.4rem; }
+h4 { font-size: 1.15rem; }
 
-/* The top page banner reads like a comic logo plate. */
+/* ---- Header: bold dark marquee with a red underline ---- */
 .header {
-  background: var(--cur-yellow) !important;
-  border: var(--cur-border) !important;
+  position: relative;
+  background: var(--cur-ink) !important;
+  border: none !important;
   border-radius: var(--cur-radius) !important;
-  box-shadow: var(--cur-hard-sm) !important;
-  color: var(--cur-ink) !important;
+  box-shadow: var(--cur-shadow-md) !important;
+  color: #fff !important;
+  overflow: hidden;
 }
-.header h1 { color: var(--cur-ink) !important; text-shadow: 2px 2px 0 rgba(255,255,255,0.35); }
+.header::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px;
+  background: var(--cur-red);
+}
+.header h1 { color: #fff !important; letter-spacing: 2px; }
+.header * { color: #fff; }
 
 /* ============================================================ *
- * 2. Surfaces — ink-bordered paper panels with hard shadows
+ * 2. Surfaces — clean white cards with ink borders + soft depth
  * ============================================================ */
 .container, .main-content, .adventure-content, .chat-wrapper {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
+  background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important;
 }
 .chat-container, .chat-sidebar, .location-block, .location-content,
 .location-info, .location-section, .location-exits-content,
@@ -121,15 +133,13 @@ h4 { font-size: 1.2rem; }
   color: var(--cur-ink) !important;
   border: var(--cur-border) !important;
   border-radius: var(--cur-radius) !important;
-  box-shadow: var(--cur-hard-sm) !important;
+  box-shadow: var(--cur-shadow-sm) !important;
   backdrop-filter: none !important;
 }
-/* Nested cards get a lighter frame so panels-in-panels don't look noisy. */
 .location-section, .location-exits-content, .skill-card, .ability-card,
 .setting-item, .entry-item, .world-time-indicator--sidebar {
-  box-shadow: var(--cur-hard-xs) !important;
+  box-shadow: none !important;
 }
-/* Force readable ink over the base's light-on-dark body text. */
 .chat-sidebar *:not(a):not(.message-sender):not(.chat-player-action-label),
 .location-block *:not(a), .config-content *:not(a):not(input):not(textarea):not(select),
 .settings-workspace *:not(a):not(input):not(textarea):not(select),
@@ -145,28 +155,30 @@ h4 { font-size: 1.2rem; }
 }
 
 /* ============================================================ *
- * 3. Tabs — the "on-air" channel selector
+ * 3. Tabs — clean pills, red when live
  * ============================================================ */
-.tab-bar, .config-page-tabs, .editor-tabs { border: none !important; gap: 8px; }
+.tab-bar, .config-page-tabs, .editor-tabs { border: none !important; gap: 6px; }
 .tab-button, .editor-tab-btn {
   font-family: var(--cur-display) !important;
   letter-spacing: 0.6px;
   color: var(--cur-ink) !important;
-  background: var(--cur-paper-3) !important;
+  background: var(--cur-paper-2) !important;
   border: var(--cur-border-2) !important;
-  border-radius: 8px !important;
-  box-shadow: var(--cur-hard-xs) !important;
+  border-radius: var(--cur-radius-sm) !important;
+  box-shadow: none !important;
   text-transform: uppercase;
+  transition: background 0.12s ease, color 0.12s ease, transform 0.1s ease;
 }
+.tab-button:hover, .editor-tab-btn:hover { transform: translateY(-1px); }
 .tab-button.active, .tab-button[aria-selected="true"],
 .editor-tab-btn.is-active, .tab-button.is-active {
   background: var(--cur-red) !important;
   color: #fff !important;
-  box-shadow: var(--cur-hard-xs) !important;
+  box-shadow: var(--cur-shadow-sm) !important;
 }
 
 /* ============================================================ *
- * 4. Buttons — bold comic keys with a real press
+ * 4. Buttons — solid modern comic keys
  * ============================================================ */
 button, .btn, .send-button, .map-action-button, .skill-increase-btn,
 .chat-player-action-button, .npc-edit-add-btn, .location-npc-add-button,
@@ -175,61 +187,56 @@ button, .btn, .send-button, .map-action-button, .skill-increase-btn,
   font-family: var(--cur-display) !important;
   letter-spacing: 0.6px;
   color: var(--cur-ink) !important;
-  background: var(--cur-paper-3) !important;
+  background: var(--cur-paper-2) !important;
   border: var(--cur-border-2) !important;
-  border-radius: 8px !important;
-  box-shadow: var(--cur-hard-xs) !important;
+  border-radius: var(--cur-radius-sm) !important;
+  box-shadow: var(--cur-shadow-sm) !important;
   text-transform: uppercase;
-  transition: transform 0.05s ease, box-shadow 0.05s ease;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease, color 0.1s ease;
 }
 button:hover, .btn:hover, .send-button:hover, .map-action-button:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: var(--cur-hard-sm) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--cur-shadow-md) !important;
 }
-button:active, .btn:active, .send-button:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--cur-ink) !important;
-}
-/* Variant fills (compound selectors to beat the base compounds). */
-.btn.btn-primary, .btn.button-primary { background: var(--cur-yellow) !important; color: var(--cur-ink) !important; }
+button:active, .btn:active, .send-button:active { transform: translateY(0); box-shadow: var(--cur-shadow-sm) !important; }
+.btn.btn-primary, .btn.button-primary { background: var(--cur-red) !important; color: #fff !important; border-color: var(--cur-ink) !important; }
 .btn.btn-secondary { background: var(--cur-blue) !important; color: #fff !important; }
-.btn.btn-accent, .send-button { background: var(--cur-red) !important; color: #fff !important; border: var(--cur-border) !important; }
+.btn.btn-accent, .send-button { background: var(--cur-red) !important; color: #fff !important; }
 .btn.btn-danger, .quest-abandon-button, .modal__footer .btn-danger { background: var(--cur-red) !important; color: #fff !important; }
-/* The active nav button lives on the yellow header plate — yellow-on-yellow
-   washes out, so make the current page red. Form primary buttons (on paper)
-   keep their yellow fill. */
+/* Active nav button on the dark header. */
 .header .btn.btn-primary, .nav-buttons .btn.btn-primary { background: var(--cur-red) !important; color: #fff !important; }
+.header .btn.btn-secondary, .nav-buttons .btn.btn-secondary { background: transparent !important; color: #fff !important; border-color: rgba(255,255,255,0.55) !important; box-shadow: none !important; }
+.header .btn.btn-secondary:hover, .nav-buttons .btn.btn-secondary:hover { background: rgba(255,255,255,0.12) !important; }
 
 /* ============================================================ *
- * 5. Chat — the Host and cast speak in comic panels
+ * 5. Chat — sleek speech panels with a bold accent bar
  * ============================================================ */
 .chat-log { gap: 14px; }
 .message {
   background: var(--cur-paper-2) !important;
-  border: var(--cur-border) !important;
-  border-radius: 14px !important;
-  box-shadow: var(--cur-hard-sm) !important;
+  border: var(--cur-border-2) !important;
+  border-left: 6px solid var(--cur-ink) !important;
+  border-radius: var(--cur-radius) !important;
+  box-shadow: var(--cur-shadow-sm) !important;
   color: var(--cur-ink) !important;
   padding: 12px 15px !important;
 }
 .message-sender {
   color: var(--cur-red) !important;
   text-transform: uppercase;
-  font-size: 1.25rem;
-  letter-spacing: 0.5px;
+  font-size: 1.15rem;
+  letter-spacing: 0.6px;
 }
 .message-timestamp { font-family: var(--cur-body) !important; }
-/* Role colors — real class names: ai-message / user-message / npc-message. */
-.message.ai-message { background: var(--cur-yellow) !important; }
-.message.user-message { background: var(--cur-blue-soft) !important; }
-.message.npc-message { background: #d9f2df !important; }
-.message.npc-message .message-sender { color: #1f7a3d !important; }
+.message.ai-message { border-left-color: var(--cur-red) !important; }
+.message.user-message { background: var(--cur-blue-soft) !important; border-left-color: var(--cur-blue) !important; }
+.message.user-message .message-sender { color: var(--cur-blue) !important; }
+.message.npc-message { border-left-color: var(--cur-green) !important; }
+.message.npc-message .message-sender { color: var(--cur-green) !important; }
 .message.event-summary-batch { background: var(--cur-paper-3) !important; }
-.message.error { background: #ffd6d2 !important; border-color: var(--cur-red) !important; }
+.message.error { background: #fdecec !important; border-color: var(--cur-red) !important; border-left-color: var(--cur-red) !important; }
 .message.error .message-sender { color: var(--cur-red) !important; }
-.message.loading { background: var(--cur-paper-2) !important; }
 
-/* Input row */
 .input-area { gap: 10px; }
 .message-input, #messageInput {
   background: #fff !important;
@@ -240,34 +247,34 @@ button:active, .btn:active, .send-button:active {
 }
 
 /* ============================================================ *
- * 6. Forms — inputs, selects, textareas
+ * 6. Forms
  * ============================================================ */
 input, textarea, select,
 .attribute-input, .skill-add-input, .game-config-override-textarea {
   background: #fff !important;
   color: var(--cur-ink) !important;
   border: var(--cur-border-2) !important;
-  border-radius: 8px !important;
+  border-radius: var(--cur-radius-sm) !important;
   font-family: var(--cur-body) !important;
-  box-shadow: inset 2px 2px 0 rgba(23, 19, 13, 0.07) !important;
+  box-shadow: none !important;
 }
 input:focus, textarea:focus, select:focus {
   outline: none !important;
   border-color: var(--cur-red) !important;
-  box-shadow: 3px 3px 0 var(--cur-red) !important;
+  box-shadow: 0 0 0 3px rgba(225, 29, 42, 0.25) !important;
 }
-::placeholder { color: rgba(23, 19, 13, 0.42) !important; }
+::placeholder { color: rgba(20, 20, 26, 0.4) !important; }
 .form-group label, .field-grid label {
   font-family: var(--cur-display) !important;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   color: var(--cur-ink) !important;
   text-transform: uppercase;
-  font-size: 1.05rem;
+  font-size: 1rem;
 }
 .form-static-value {
   background: var(--cur-paper-3) !important;
   border: var(--cur-border-2) !important;
-  border-radius: 8px !important;
+  border-radius: var(--cur-radius-sm) !important;
   color: var(--cur-ink) !important;
 }
 
@@ -278,66 +285,57 @@ input:focus, textarea:focus, select:focus {
   background: var(--cur-paper-2) !important;
   border: var(--cur-border) !important;
   border-radius: var(--cur-radius) !important;
-  box-shadow: var(--cur-hard) !important;
+  box-shadow: var(--cur-shadow-lg) !important;
   color: var(--cur-ink) !important;
 }
 .modal__header {
-  background: var(--cur-yellow) !important;
-  color: var(--cur-ink) !important;
-  border-bottom: var(--cur-border) !important;
+  background: var(--cur-ink) !important;
+  color: #fff !important;
+  border-bottom: none !important;
   text-transform: uppercase;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
 }
+.modal__header * { color: #fff !important; }
 .modal__body, .modal__footer, .modal__instruction { color: var(--cur-ink) !important; }
-.modal-backdrop, .overlay-backdrop { background: rgba(23, 19, 13, 0.55) !important; }
+.modal-backdrop, .overlay-backdrop { background: rgba(20, 20, 26, 0.55) !important; }
 
 /* ============================================================ *
  * 8. Per-screen specifics
  * ============================================================ */
-/* new-game: the base paints .page-section translucent-white via inline <style>. */
 .page-section {
   background: var(--cur-paper-2) !important;
   color: var(--cur-ink) !important;
   border: var(--cur-border) !important;
   border-radius: var(--cur-radius) !important;
-  box-shadow: var(--cur-hard) !important;
+  box-shadow: var(--cur-shadow-md) !important;
 }
-.overlay-content { background: var(--cur-paper-2) !important; border: var(--cur-border) !important; border-radius: var(--cur-radius) !important; box-shadow: var(--cur-hard) !important; }
+.overlay-content { background: var(--cur-paper-2) !important; border: var(--cur-border) !important; border-radius: var(--cur-radius) !important; box-shadow: var(--cur-shadow-lg) !important; }
 .overlay-text { color: var(--cur-ink) !important; }
 .spinner { border-color: var(--cur-paper-3) !important; border-top-color: var(--cur-red) !important; }
 
-/* settings library items + badges */
 .setting-badge { background: var(--cur-blue) !important; color: #fff !important; border: var(--cur-border-2) !important; border-radius: 6px !important; }
-.setting-item.is-selected, .setting-item[aria-selected="true"] { background: var(--cur-yellow) !important; }
+.setting-item.is-selected, .setting-item[aria-selected="true"] { background: var(--cur-blue-soft) !important; }
 
-/* lorebooks: entry cards + badges (lorebooks.css also redefines .btn/.modal — we load after it) */
 .badge, .entry-badges .badge { background: var(--cur-paper-3) !important; border: var(--cur-border-2) !important; border-radius: 6px !important; color: var(--cur-ink) !important; }
 .badge-constant { background: var(--cur-yellow) !important; }
 .badge-priority { background: var(--cur-blue) !important; color: #fff !important; }
 .badge-disabled { background: var(--cur-paper-3) !important; color: var(--cur-ink-soft) !important; }
-.lorebook-item.active, .lorebook-item.is-active { background: var(--cur-yellow) !important; }
+.lorebook-item.active, .lorebook-item.is-active { background: var(--cur-blue-soft) !important; }
 .empty-state, .quest-empty, .party-empty, .abilities-empty, .faction-empty,
-.location-npc-empty, .no-exits, .story-tools-empty {
-  color: var(--cur-ink-soft) !important;
-}
+.location-npc-empty, .no-exits, .story-tools-empty { color: var(--cur-ink-soft) !important; }
 
-/* status banners */
-.status-message.success, #statusMessage.success { background: #d9f2df !important; border: var(--cur-border-2) !important; color: var(--cur-ink) !important; border-radius: 8px !important; }
-.status-message.error, #statusMessage.error { background: #ffd6d2 !important; border: var(--cur-border-2) !important; color: var(--cur-ink) !important; border-radius: 8px !important; }
+.status-message.success, #statusMessage.success { background: #e2f6ea !important; border: var(--cur-border-2) !important; color: var(--cur-ink) !important; border-radius: var(--cur-radius-sm) !important; }
+.status-message.error, #statusMessage.error { background: #fdecec !important; border: var(--cur-border-2) !important; color: var(--cur-ink) !important; border-radius: var(--cur-radius-sm) !important; }
 
-/* plausibility popup cards in the chat */
 .popup-card__header { border-bottom: var(--cur-border-2) !important; }
 .popup-card__badge { border: var(--cur-border-2) !important; border-radius: 6px !important; font-family: var(--cur-display) !important; text-transform: uppercase; }
 .popup-card__title { color: var(--cur-ink) !important; }
 
 /* ============================================================ *
- * 9. Scrollbars
+ * 9. Scrollbars — thin + modern
  * ============================================================ */
-* { scrollbar-color: var(--cur-ink) var(--cur-paper-3); }
-::-webkit-scrollbar { width: 12px; height: 12px; }
-::-webkit-scrollbar-track { background: var(--cur-paper-3); }
-::-webkit-scrollbar-thumb {
-  background: var(--cur-ink);
-  border-radius: 8px;
-  border: 2px solid var(--cur-paper-3);
-}
+* { scrollbar-width: thin; scrollbar-color: var(--cur-ink) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--cur-ink); border-radius: 999px; border: 2px solid var(--cur-paper); }
+::-webkit-scrollbar-thumb:hover { background: var(--cur-red); }

@@ -167,13 +167,8 @@
   }
 
   function addReopenButton() {
-    if (document.getElementById('curTutReopen')) return;
-    var b = el('button', 'cur-tut-reopen');
-    b.id = 'curTutReopen';
-    b.type = 'button';
-    b.textContent = '🎙️ How to Play';
-    b.addEventListener('click', open);
-    document.body.appendChild(b);
+    (window.__CUR_DOCK__ = window.__CUR_DOCK__ || []).push({ icon: '🎙️', label: 'How to Play', onClick: open });
+    if (window.__CUR_DOCK_RENDER__) window.__CUR_DOCK_RENDER__();
   }
 
   function init() {

@@ -56,9 +56,8 @@
   function open() { if (!overlay) build(); overlay.style.display = 'flex'; api('/standings', 'GET').then(function (s) { renderBoard(s && s.standings); }); }
   function hide() { if (overlay) overlay.style.display = 'none'; }
   function addButton() {
-    if (document.getElementById('rvReopen')) return;
-    var b = document.createElement('button'); b.id = 'rvReopen'; b.className = 'rv-reopen'; b.type = 'button';
-    b.textContent = '📺 Standings'; b.addEventListener('click', open); document.body.appendChild(b);
+    (window.__CUR_DOCK__ = window.__CUR_DOCK__ || []).push({ icon: '📺', label: 'Standings', onClick: open });
+    if (window.__CUR_DOCK_RENDER__) window.__CUR_DOCK_RENDER__();
   }
 
   // ---- per-turn tick ----

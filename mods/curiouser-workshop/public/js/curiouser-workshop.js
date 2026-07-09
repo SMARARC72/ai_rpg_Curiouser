@@ -240,12 +240,8 @@
   function hide() { if (overlay) overlay.style.display = 'none'; }
 
   function addButton() {
-    if (document.getElementById('cwReopen')) return;
-    var b = document.createElement('button');
-    b.id = 'cwReopen'; b.className = 'cw-reopen'; b.type = 'button';
-    b.textContent = '🔧 Prop Shop';
-    b.addEventListener('click', open);
-    document.body.appendChild(b);
+    (window.__CUR_DOCK__ = window.__CUR_DOCK__ || []).push({ icon: '🔧', label: 'Prop Shop', onClick: open });
+    if (window.__CUR_DOCK_RENDER__) window.__CUR_DOCK_RENDER__();
   }
 
   function init() { addButton(); }

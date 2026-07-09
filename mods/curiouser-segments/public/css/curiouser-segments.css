@@ -5,7 +5,7 @@
 .sg-backdrop { position: fixed; inset: 0; background: rgba(23,19,13,0.6); display: none; align-items: center; justify-content: center; z-index: 99000; padding: 20px; }
 .sg-modal { width: 100%; max-width: 460px; display: flex; flex-direction: column;
   background: var(--cur-paper-2, #fbf5e6); color: var(--cur-ink, #17130d);
-  border: 3px solid var(--cur-ink, #17130d); border-radius: 12px; box-shadow: 8px 8px 0 var(--cur-ink, #17130d);
+  border: 3px solid var(--cur-ink, #17130d); border-radius: 12px; box-shadow: 0 14px 34px rgba(20,20,26,0.26);
   font-family: var(--cur-body, 'Comic Neue','Segoe UI',system-ui,sans-serif); overflow: hidden; }
 .sg-header { display: flex; align-items: center; justify-content: space-between; background: var(--cur-yellow, #ffd23f);
   border-bottom: 3px solid var(--cur-ink, #17130d); padding: 10px 16px; }
@@ -23,6 +23,6 @@
 .sg-reopen { position: fixed; left: 16px; bottom: 154px; z-index: 90000;
   font-family: var(--cur-display, 'Bangers','Arial Black',sans-serif); letter-spacing: 0.5px; text-transform: uppercase;
   color: var(--cur-ink, #17130d); background: var(--cur-green, #3fb562); border: 3px solid var(--cur-ink, #17130d); border-radius: 999px;
-  box-shadow: 3px 3px 0 var(--cur-ink, #17130d); padding: 8px 14px; cursor: pointer; transition: transform 0.05s ease, box-shadow 0.05s ease; }
-.sg-reopen:hover { transform: translate(-2px,-2px); box-shadow: 5px 5px 0 var(--cur-ink, #17130d); }
+  box-shadow: 0 6px 16px rgba(20,20,26,0.2); padding: 8px 14px; cursor: pointer; transition: transform 0.05s ease, box-shadow 0.05s ease; }
+.sg-reopen:hover { transform: translate(-2px,-2px); box-shadow: 0 12px 26px rgba(20,20,26,0.24); }
 @media (max-width: 640px) { .sg-title { font-size: 1.2rem; } .sg-reopen { padding: 6px 10px; font-size: 0.85rem; } }
