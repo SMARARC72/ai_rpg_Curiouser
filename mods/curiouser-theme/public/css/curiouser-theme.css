@@ -11,7 +11,7 @@
  * compiled base rules.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@600;700;800&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap');
 
 :root {
   --cur-ink: #14141a;
@@ -30,21 +30,21 @@
   --cur-pink: #ff3d7f;
   --cur-purple: #7a3ff2;
 
-  --cur-border: 2.5px solid var(--cur-ink);
-  --cur-border-2: 2px solid var(--cur-ink);
-  --cur-radius: 10px;
-  --cur-radius-sm: 8px;
+  --cur-border: 2px solid var(--cur-ink);
+  --cur-border-2: 1.5px solid rgba(20, 20, 26, 0.14);
+  --cur-radius: 18px;
+  --cur-radius-sm: 12px;
 
-  --cur-shadow-sm: 0 2px 8px rgba(20, 20, 26, 0.14);
-  --cur-shadow-md: 0 6px 18px rgba(20, 20, 26, 0.20);
-  --cur-shadow-lg: 0 14px 34px rgba(20, 20, 26, 0.26);
+  --cur-shadow-sm: 0 3px 12px rgba(20, 20, 26, 0.10);
+  --cur-shadow-md: 0 10px 26px rgba(20, 20, 26, 0.14);
+  --cur-shadow-lg: 0 20px 46px rgba(20, 20, 26, 0.20);
   /* Legacy names the base UI references — remapped to sleek soft depth. */
   --cur-hard: var(--cur-shadow-lg);
   --cur-hard-sm: var(--cur-shadow-md);
   --cur-hard-xs: var(--cur-shadow-sm);
 
-  --cur-display: 'Anton', 'Impact', 'Arial Narrow', 'Haettenschweiler', system-ui, sans-serif;
-  --cur-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --cur-display: 'Kanit', 'Arial Black', 'Segoe UI', system-ui, sans-serif;
+  --cur-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
   /* Base modal tokens -> clean modern comic. */
   --airpg-modal-backdrop: rgba(20, 20, 26, 0.55);
@@ -86,11 +86,11 @@ h1, h2, h3, h4,
 .crafting-modal__section-header, .thing-modifier-header, .editor-intro h1,
 .popup-card__title {
   font-family: var(--cur-display) !important;
-  font-weight: 400;
-  letter-spacing: 0.4px;
+  font-weight: 800 !important;
+  letter-spacing: 0.2px;
   text-transform: uppercase;
 }
-h1 { font-size: 2.6rem; line-height: 1; }
+h1 { font-size: 2.5rem; line-height: 1.02; }
 h2 { font-size: 1.9rem; }
 h3 { font-size: 1.4rem; }
 h4 { font-size: 1.15rem; }
@@ -136,9 +136,20 @@ h4 { font-size: 1.15rem; }
   box-shadow: var(--cur-shadow-sm) !important;
   backdrop-filter: none !important;
 }
-.location-section, .location-exits-content, .skill-card, .ability-card,
-.setting-item, .entry-item, .world-time-indicator--sidebar {
+/* De-box: nested structural sections blend into their parent (no box-in-box). */
+.location-section, .location-content, .location-info, .location-exits-content,
+.world-time-indicator--sidebar {
   box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+/* Standalone cards keep only a soft hairline + gentle fill, not a black box. */
+.skill-card, .ability-card, .setting-item, .entry-item, .tooltip-thing-stack-card {
+  box-shadow: none !important;
+  border: 1.5px solid rgba(20, 20, 26, 0.10) !important;
+  background: var(--cur-paper-2) !important;
+  border-radius: var(--cur-radius-sm) !important;
 }
 .chat-sidebar *:not(a):not(.message-sender):not(.chat-player-action-label),
 .location-block *:not(a), .config-content *:not(a):not(input):not(textarea):not(select),

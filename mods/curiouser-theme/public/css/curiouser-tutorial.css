@@ -22,8 +22,8 @@
   overflow: auto;
   background: var(--cur-paper-2, #fbf5e6);
   color: var(--cur-ink, #17130d);
-  border: 3px solid var(--cur-ink, #17130d);
-  border-radius: 12px;
+  border: 2px solid var(--cur-ink, #17130d);
+  border-radius: 18px;
   box-shadow: 0 14px 34px rgba(20,20,26,0.26);
   font-family: var(--cur-body, 'Comic Neue', 'Segoe UI', system-ui, sans-serif);
 }
@@ -91,8 +91,8 @@
   font-family: var(--cur-display, 'Bangers', 'Arial Black', sans-serif) !important;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  border: 3px solid var(--cur-ink, #17130d) !important;
-  border-radius: 8px !important;
+  border: 2px solid var(--cur-ink, #17130d) !important;
+  border-radius: 12px !important;
   box-shadow: 0 6px 16px rgba(20,20,26,0.2) !important;
   padding: 8px 16px !important;
   cursor: pointer;
@@ -117,7 +117,7 @@
   text-transform: uppercase;
   color: var(--cur-ink, #17130d);
   background: var(--cur-yellow, #ffd23f);
-  border: 3px solid var(--cur-ink, #17130d);
+  border: 2px solid var(--cur-ink, #17130d);
   border-radius: 999px;
   box-shadow: 0 6px 16px rgba(20,20,26,0.2);
   padding: 8px 14px;

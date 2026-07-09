@@ -14,8 +14,8 @@
   display: flex; flex-direction: column;
   background: var(--cur-paper-2, #fbf5e6);
   color: var(--cur-ink, #17130d);
-  border: 3px solid var(--cur-ink, #17130d);
-  border-radius: 12px;
+  border: 2px solid var(--cur-ink, #17130d);
+  border-radius: 18px;
   box-shadow: 0 14px 34px rgba(20,20,26,0.26);
   font-family: var(--cur-body, 'Comic Neue', 'Segoe UI', system-ui, sans-serif);
   overflow: hidden;
@@ -37,7 +37,7 @@
   font-family: var(--cur-display, 'Bangers', 'Arial Black', sans-serif);
   text-transform: uppercase; letter-spacing: 0.5px;
   background: var(--cur-paper-3, #efe1c2); color: var(--cur-ink, #17130d);
-  border: 2px solid var(--cur-ink, #17130d); border-radius: 8px 8px 0 0;
+  border: 2px solid var(--cur-ink, #17130d); border-radius: 12px 12px 0 0;
   padding: 6px 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(20,20,26,0.14);
 }
 .cw-tab.is-active { background: var(--cur-red, #e5322b); color: #fff; }
@@ -68,7 +68,7 @@
 .cw-list { display: flex; flex-direction: column; gap: 8px; }
 .cw-row {
   display: flex; align-items: center; gap: 10px; justify-content: space-between;
-  background: #fff; border: 2px solid var(--cur-ink, #17130d); border-radius: 8px;
+  background: #fff; border: 2px solid var(--cur-ink, #17130d); border-radius: 12px;
   padding: 8px 10px; box-shadow: 0 2px 8px rgba(20,20,26,0.14);
 }
 .cw-row.cw-locked { opacity: 0.5; }
@@ -89,7 +89,7 @@
   font-family: var(--cur-display, 'Bangers', 'Arial Black', sans-serif);
   text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
   background: var(--cur-paper-3, #efe1c2); color: var(--cur-ink, #17130d);
-  border: 2px solid var(--cur-ink, #17130d); border-radius: 8px;
+  border: 2px solid var(--cur-ink, #17130d); border-radius: 12px;
   padding: 6px 12px; cursor: pointer; box-shadow: 0 2px 8px rgba(20,20,26,0.14);
   transition: transform 0.05s ease, box-shadow 0.05s ease;
 }
@@ -116,7 +116,7 @@
   font-family: var(--cur-display, 'Bangers', 'Arial Black', sans-serif);
   letter-spacing: 0.5px; text-transform: uppercase;
   color: var(--cur-ink, #17130d); background: var(--cur-green, #3fb562);
-  border: 3px solid var(--cur-ink, #17130d); border-radius: 999px;
+  border: 2px solid var(--cur-ink, #17130d); border-radius: 999px;
   box-shadow: 0 6px 16px rgba(20,20,26,0.2);
   padding: 8px 14px; cursor: pointer; transition: transform 0.05s ease, box-shadow 0.05s ease;
 }
