@@ -14940,21 +14940,18 @@ module.exports = function registerApiRoutes(scope) {
 
                         let npcTurns = null;
                         if (!skipNpcTurns) {
-
-                            const roll = Math.random();
-                            console.log(`NPC turn frequency check: rolled ${roll.toFixed(3)} for frequency ${npcTurnFrequency}`);
-                            if (roll < npcTurnFrequency) {
-
-                                npcTurns = await executeNpcTurnsAfterPlayer({
-                                    location,
-                                    stream,
-                                    skipNpcEvents: skipNpcTurns,
-                                    entryCollector: newChatEntries,
-                                    maxFriendlyNpcsToAct: maxNpcsToAct,
-                                    maxHostileNpcsToAct,
-                                    currentTurnLog
-                                });
-                            }
+                            // Frequency was already decided by the single roll above. A second
+                            // independent roll here used to square the probability (npcTurnFrequency²),
+                            // which silenced NPCs ~91% of the time at the 0.3 default. Resolve directly.
+                            npcTurns = await executeNpcTurnsAfterPlayer({
+                                location,
+                                stream,
+                                skipNpcEvents: skipNpcTurns,
+                                entryCollector: newChatEntries,
+                                maxFriendlyNpcsToAct: maxNpcsToAct,
+                                maxHostileNpcsToAct,
+                                currentTurnLog
+                            });
                         }
                         if (skipRandomEvents) {
                             console.log('Skipping random events due to forced event.');

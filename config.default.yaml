@@ -178,10 +178,11 @@ imagegen:
     scenery:
 random_event_frequency:
   enabled: true
-  common: 0.05
-  rare: 0.01
-  regionSpecific: 0.05
-  locationSpecific: 0.05
+  # Curiouser: livelier world — more curveballs, twists and Host complications.
+  common: 0.15
+  rare: 0.02
+  regionSpecific: 0.12
+  locationSpecific: 0.1
 random_event_frequency_multiplier: 1
 
 # World time/calendar defaults
@@ -235,8 +236,10 @@ locations:
   levelVariation: 3
 npc_turns:
   enabled: true
-  maxNpcsToAct: 1
-  npcTurnFrequency: 0.3
+  maxNpcsToAct: 2
+  # Curiouser: the cast should act most turns so the world isn't passive.
+  # (With the api.js double-roll bug fixed, this value is now honest.)
+  npcTurnFrequency: 0.8
 quests:
   enabled: true
 quest_checks:
@@ -316,7 +319,8 @@ recent_history_turns: 25
 
 # Number of eligible player-action turns between automatic plot-expander prompt runs.
 # Set to 0 to disable automatic plot-expander runs.
-plot_expander_prompt_frequency: 10
+# Curiouser: run it early and often so forward "next scene" guidance is in context.
+plot_expander_prompt_frequency: 4
 
 base_context:
   # When true, omit inventory items from the base-context prompt.
