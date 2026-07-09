@@ -349,6 +349,8 @@ mods:
     enabled: true
   curiouser-comic:
     enabled: true
+  curiouser-theme:
+    enabled: true
   # sceneIllustration:
   #   additional_instructions:
 

@@ -73,6 +73,7 @@ if (deployMode || !fs.existsSync(configPath)) {
   config.mods = config.mods || {};
   config.mods['curiouser-economy'] = { ...(config.mods['curiouser-economy'] || {}), enabled: true };
   config.mods['curiouser-comic'] = { ...(config.mods['curiouser-comic'] || {}), enabled: true };
+  config.mods['curiouser-theme'] = { ...(config.mods['curiouser-theme'] || {}), enabled: true };
 
   fs.writeFileSync(configPath, yaml.dump(config));
   effectivePort = config.server.port;

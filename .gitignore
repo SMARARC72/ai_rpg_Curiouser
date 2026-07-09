@@ -24,6 +24,7 @@ mods/scene-illustrations/data/*
 # Track the Curiouser mods (source), but not their runtime data dirs
 !mods/curiouser-economy/
 !mods/curiouser-comic/
+!mods/curiouser-theme/
 mods/curiouser-economy/data/
 mods/curiouser-comic/data/
 imagegen/qwen_image_2512_nova.json
