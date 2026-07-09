@@ -76,15 +76,59 @@
         payload.existingImageId = existingImageId;
       }
 
-      const response = await fetch('/api/images/request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
+      // A freshly created or loaded game can ask for an entity's image a beat
+      // before the server has committed that entity — most visibly the player
+      // portrait during new-game world generation, when the players map has been
+      // cleared and is still being rebuilt. Rather than throwing (which spams the
+      // console and paints a broken "error" placeholder), treat a "not found"
+      // 404 as "not ready yet": retry a few times so the image loads once the
+      // entity commits, then give up quietly as a skip for a later re-render.
+      const NOT_FOUND_RETRIES = 4;
+      const RETRY_DELAY_MS = 1500;
 
-      const data = await response.json().catch(() => ({}));
+      let response;
+      let data;
+      for (let attempt = 0; ; attempt += 1) {
+        response = await fetch('/api/images/request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        data = await response.json().catch(() => ({}));
+
+        const entityNotReady = response.status === 404
+          && typeof data?.error === 'string'
+          && /not found/i.test(data.error);
+
+        if (!entityNotReady) {
+          break;
+        }
+
+        if (attempt >= NOT_FOUND_RETRIES) {
+          // Still missing after retries — give up without an error so the normal
+          // placeholder stays and a later render (e.g. on new-game readiness) can
+          // request it again.
+          const notReadyResult = {
+            entityType,
+            entityId,
+            imageId: existingImageId || null,
+            imageUrl: null,
+            jobId: null,
+            job: null,
+            skipped: true,
+            existingJob: false,
+            reason: 'entity_not_ready',
+            message: data?.error || null
+          };
+          this._dispatch('image:skipped', notReadyResult);
+          return notReadyResult;
+        }
+
+        await this._sleep(RETRY_DELAY_MS);
+      }
 
       if (!response.ok && response.status !== 202) {
         const error = data?.error || `Image request failed (${response.status})`;
