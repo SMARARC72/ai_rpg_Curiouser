@@ -26244,10 +26244,13 @@ async function startServer() {
 
         if (config.imagegen && config.imagegen.enabled) {
             if (comfyUIClient) {
-                if ((config.imagegen.engine || 'comfyui') === 'nanogpt') {
+                const imageEngine = config.imagegen.engine || 'comfyui';
+                if (imageEngine === 'nanogpt') {
                     console.log('🎨 Image generation ready (NanoGPT)');
-                } else {
+                } else if (imageEngine === 'comfyui' && config.imagegen.server) {
                     console.log(`🎨 Image generation ready (ComfyUI: ${config.imagegen.server.host}:${config.imagegen.server.port})`);
+                } else {
+                    console.log(`🎨 Image generation ready (${imageEngine})`);
                 }
             } else {
                 console.log('🎨 Image generation disabled (engine unavailable)');

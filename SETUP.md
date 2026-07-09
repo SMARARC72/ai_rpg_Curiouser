@@ -52,6 +52,26 @@ See `curiouser/README.md` for details and gotchas, and
 `node curiouser/verify-reskin.mjs` for an LLM-free check that the reskin surfaces in the
 prompt.
 
+## Milestones 2 & 3 — economy + comic (mods, on by default)
+
+Both mods are enabled in `config.default.yaml` and load automatically:
+
+- **`mods/curiouser-economy`** — Ratings / Audience Favor / Legacy as Host-spoken meters,
+  plus Episode stakes, Curveballs, and Sponsors at `/api/mods/curiouser-economy/...`.
+- **`mods/curiouser-comic`** — panel beats → composited comic pages → HTML chapter at
+  `/api/mods/curiouser-comic/...`.
+
+LLM-free verification: `node mods/curiouser-comic/verify-compose.mjs` (writes a sample
+`tmp/comic-page.png` + `tmp/comic-chapter.html`). Real panel *images* need an image
+backend (`config.imagegen`).
+
+## Deploy (Railway or any Node host)
+
+`scripts/railway-start.mjs` makes one deploy fully playable — it builds `config.yaml` from
+environment variables, enables the mods, stages + applies the reskin, and starts the
+server. See **`docs/CURIOUSER/DEPLOY_RAILWAY.md`** for the environment variables and the
+ephemeral-filesystem / Volume persistence caveat.
+
 ## Engineering conventions
 
 Follow `AGENTS.md`: fail loudly (no silent fallbacks); log new prompts via

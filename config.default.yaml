@@ -344,6 +344,11 @@ mods:
     enabled: false
   party-needs:
     enabled: false
+  # Curiouser mods (on by default for this fork)
+  curiouser-economy:
+    enabled: true
+  curiouser-comic:
+    enabled: true
   # sceneIllustration:
   #   additional_instructions:
 

@@ -43,7 +43,7 @@ Conventions (`AGENTS.md`): fail loudly / no silent fallbacks; log new prompts vi
 
 ---
 
-## 3. Economy substrate (Milestone 2 — planned)
+## 3. Economy substrate (Milestone 2 — implemented in `mods/curiouser-economy`)
 
 - **Model the five meters as need bars** via a `defs/need_bars.yaml` overlay in `mods/curiouser-economy`. A need bar is fully declarative: `name`, `description`, audience booleans (`player`/`party`/`non_party`), `min`/`max`/`initial`, `change_per_minute`, per-bar `need_values{small,medium,large}`, trigger lists (`small_increase`…`fill_completely`…`large_decrease`), and `effect_thresholds` keyed by value, each `{name, sentence, effect}`. **[verified]** (Root global fallback magnitudes: `need_values{small:100,medium:250,large:700,all:1000}`.)
 - **Meters surface as English sentences, not numbers.** `getNeedSentencePromptContext` emits each active bar's current `effect_thresholds[n].sentence` (with `%CHARACTER%` substituted) into the prompt `<needs>` block. **[verified]** Author threshold sentences in the Host's voice → satisfies "the Host is the HUD" for free. Ship **no** `public/` assets so nothing renders as a dashboard.
@@ -54,7 +54,7 @@ Conventions (`AGENTS.md`): fail loudly / no silent fallbacks; log new prompts vi
 
 ---
 
-## 4. Comic assembly (Milestone 3 — planned)
+## 4. Comic assembly (Milestone 3 — implemented in `mods/curiouser-comic`)
 
 - One shared in-memory image queue: `generateImageId()` → `createImageJob(jobId, payload)` → `jobQueue.push(jobId)` → `processJobQueue()`. **Serial by default (`maxConcurrentJobs: 1`)**, so N panels run N×(30–90s); per-job timeout is **2 minutes**. **[verified/gotcha]** Handle partial failure (some panels may TIMEOUT).
 - Images save to `public/generated-images/<imageId>.png` and return `{ imageId, images:[{url:'/generated-images/<file>'}] }`; `public` is served static, so composited pages written there are immediately fetchable. **[verified]** (Write output there, not the mod's own `public/`.)

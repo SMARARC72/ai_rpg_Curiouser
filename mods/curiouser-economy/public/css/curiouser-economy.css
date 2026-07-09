@@ -1,0 +1,12 @@
+/*
+ * The Host is the HUD. Hide ONLY the three gameshow meters so they are never a
+ * rendered dashboard — the Host speaks them via their need-bar threshold
+ * sentences. Survival bars (food / stamina / rest / mana) and every other bar
+ * stay visible; we target these three by their bar id (rendered as
+ * data-bar-id on each .need-bar wrapper in views/index.njk).
+ */
+.need-bar[data-bar-id="ratings"],
+.need-bar[data-bar-id="audience_favor"],
+.need-bar[data-bar-id="legacy"] {
+  display: none !important;
+}

@@ -26,14 +26,14 @@ A **reskin + two mods** on top of the existing engine. Do **not** rewrite the en
 
 ## Build order
 
-See `docs/CURIOUSER/V0_BUILD_SCOPE.md`. In short: (0) get the vanilla engine running → (1) reskin as data → (2) economy mod → (3) comic-assembly mod → (4) character consistency (ComfyUI + IP-Adapter) and drift-proofing later.
+See `docs/CURIOUSER/V0_BUILD_SCOPE.md`. Status: (0) engine running ✓ · (1) reskin as data ✓ · (2) economy mod ✓ · (3) comic-assembly mod ✓ · (4) character consistency (ComfyUI + IP-Adapter), drift-proofing, Host name/voice, season arc — **post-v0, needs a GPU/ComfyUI backend**. v0 (M0–M3) is Railway-deployable; see `docs/CURIOUSER/DEPLOY_RAILWAY.md`.
 
 ## Curiouser assets in this repo
 
-- `curiouser/setting/curiouser.setting.json` — the Curiouser Setting (Host voice + Ink + gameshow framing as data).
-- `curiouser/lorebooks/curiouser-wonderland.json` — the Wonderland/gameshow lorebook.
-- `curiouser/install-curiouser.mjs` — installs the above into the engine's runtime dirs (`saves/settings/`, `lorebooks/`) and enables the lorebook.
-- `curiouser/README.md` — how to install + apply the reskin, and the known gotchas.
+- **Reskin (M1):** `curiouser/setting/curiouser.setting.json` (Host voice + Ink + gameshow framing as data), `curiouser/lorebooks/curiouser-wonderland.json` (the Wonderland/gameshow lorebook), `curiouser/install-curiouser.mjs` (stages them into `saves/settings/` + `lorebooks/` and enables the lorebook), `curiouser/verify-reskin.mjs`, `curiouser/README.md`.
+- **Economy mod (M2):** `mods/curiouser-economy/` — Ratings / Audience Favor / Legacy as Host-spoken need bars (hidden from the UI so the Host is the HUD; survival bars stay visible), plus Episode stakes (Renewal Threshold → Renewed / On-the-Bubble / Cancelled / Reboot), Curveballs, and Sponsors as routes.
+- **Comic mod (M3):** `mods/curiouser-comic/` — composite panel beats into multi-panel comic pages (caption boxes + speech bubbles via `sharp`) and export a self-contained HTML chapter. `verify-compose.mjs` proves the pipeline without a backend.
+- **Deploy:** `scripts/railway-start.mjs` + `railway.json` + `Procfile` + `docs/CURIOUSER/DEPLOY_RAILWAY.md` — one-deploy-playable on Railway (config from env, reskin auto-applied).
 
 ## Open decisions (flagged, not resolved)
 

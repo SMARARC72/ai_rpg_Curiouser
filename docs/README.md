@@ -21,7 +21,8 @@ This index lists every other Markdown file under `docs/` with a brief descriptio
 
 - [CURIOUSER/Design_Bible_and_Build_Plan.md](CURIOUSER/Design_Bible_and_Build_Plan.md) — The Curiouser design bible: concept, creative pillars, the gameshow frame (the Show/Host/Audience/Renewed-vs-Cancelled), the six comedy laws, the three systems (format & stakes, world engine, economy), and the reuse-over-rebuild build strategy on top of `ai_rpg`.
 - [CURIOUSER/V0_BUILD_SCOPE.md](CURIOUSER/V0_BUILD_SCOPE.md) — The v0 milestone ladder: (0) engine running, (1) reskin as data, (2) economy mod, (3) comic-assembly mod, (4) later (character consistency, drift-proofing).
-- [CURIOUSER/ENGINE_MAP.md](CURIOUSER/ENGINE_MAP.md) — Code-grounded, adversarially-verified map of the engine's reskin / mod-API / economy / comic extension points, with file:line citations and the gotchas (no boot auto-load, no per-turn mod hook, `scope.modConfig` always `{}`, serial image queue, no PDF/CBZ dep). Read before building a mod. The reskin assets + installer live at `../../curiouser/` (see `curiouser/README.md`).
+- [CURIOUSER/ENGINE_MAP.md](CURIOUSER/ENGINE_MAP.md) — Code-grounded, adversarially-verified map of the engine's reskin / mod-API / economy / comic extension points, with file:line citations and the gotchas (no boot auto-load, no per-turn mod hook, `scope.modConfig` always `{}`, serial image queue, no PDF/CBZ dep). Read before building a mod. The reskin assets + installer live at `../../curiouser/` (see `curiouser/README.md`); the economy and comic mods live at `../../mods/curiouser-economy/` and `../../mods/curiouser-comic/`.
+- [CURIOUSER/DEPLOY_RAILWAY.md](CURIOUSER/DEPLOY_RAILWAY.md) — How to deploy Curiouser on Railway (or any Node host): the `scripts/railway-start.mjs` entrypoint, the environment variables, one-deploy-playable flow, and the ephemeral-filesystem / Volume persistence caveat.
 
 ## UI docs (`docs/ui`)
 

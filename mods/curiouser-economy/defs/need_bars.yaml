@@ -1,0 +1,180 @@
+# Curiouser economy meters, added as need bars so the engine's per-turn need-bar
+# event-check moves them from play and injects their threshold SENTENCES into the
+# prompt — i.e. the Host speaks the numbers (the Host is the HUD). The bars' visual
+# UI is hidden by public/css/curiouser-economy.css (targeting these bar ids), while
+# the survival bars (food/stamina/rest/mana) are left untouched and visible.
+#
+# Scale is 0-100 so the Host can quote them as percentages. change_per_minute: 0 so
+# they do NOT drift on the world clock — they only move on graded play (and, for
+# Legacy, on episode outcomes handled in mod.js).
+need_bars:
+  ratings:
+    name: Ratings
+    description: Live audience share for the current Episode. Clever, bold, rule-exploiting play spikes it; stalling and playing it safe bleed it. Gates Renewal; the Host quotes it constantly.
+    related_attribute: charisma
+    player: true
+    party: false
+    non_party: false
+    icon: 📺
+    color: "#FF2D55"
+    min: 0
+    max: 100
+    initial: 30
+    change_per_minute: 0
+    relative_to_level: false
+    need_values:
+      small: 5
+      medium: 12
+      large: 25
+    small_increase:
+      - a small clever touch or a decent joke
+      - a mildly bold choice
+    medium_increase:
+      - a genuinely clever plan
+      - exploiting an Episode House Rule
+      - playing to the crowd
+    large_increase:
+      - a brilliant subversion of the expected outcome
+      - a jaw-dropping stunt the audience did not see coming
+    fill_completely:
+      - an all-time must-see television moment
+    small_decrease:
+      - hesitating or stalling
+      - a safe, boring choice
+    large_decrease:
+      - waking up slowly / refusing to act
+      - a tedious, repetitive, or self-indulgent scene
+    effect_thresholds:
+      0:
+        name: Flatline
+        sentence: "%CHARACTER%'s Ratings have flatlined at zero, and the Host is one breath from calling Cancellation."
+        effect: Renewal impossible; Cancellation imminent
+      10:
+        name: Bombing
+        sentence: "%CHARACTER% is bombing, and the Host keeps quoting the number like a diagnosis."
+        effect: Well below any Renewal Threshold
+      30:
+        name: Soft
+        sentence: "%CHARACTER%'s Ratings are soft and the audience is drifting toward their phones."
+        effect: Below a typical Renewal Threshold
+      50:
+        name: Holding
+        sentence: "%CHARACTER% is holding the audience — a decent share, nothing special yet."
+        effect: Around a typical Renewal Threshold
+      70:
+        name: Hit
+        sentence: "%CHARACTER% has a hit on their hands; the crowd is leaning in."
+        effect: Comfortably Renewed at most thresholds
+      90:
+        name: MustSee
+        sentence: "%CHARACTER% is must-see television and the audience is on its feet."
+        effect: Blowout Renewal; sponsors bid hard
+  audience_favor:
+    name: Audience Favor
+    description: The crowd's love for the contestant — a durable fanbase meter. High favor tilts votes, Curveballs, and Sponsors your way; low favor means heckling and votes against you.
+    related_attribute: charisma
+    player: true
+    party: false
+    non_party: false
+    icon: 👏
+    color: "#FFD60A"
+    min: 0
+    max: 100
+    initial: 50
+    change_per_minute: 0
+    relative_to_level: false
+    need_values:
+      small: 5
+      medium: 12
+      large: 25
+    small_increase:
+      - a likeable moment
+      - honoring the bit
+    medium_increase:
+      - an earned, heartfelt beat
+      - a crowd-pleasing flourish
+    large_increase:
+      - a moment the audience will quote for weeks
+    fill_completely:
+      - becoming the audience's absolute darling
+    small_decrease:
+      - a cheap or mean-spirited move the crowd dislikes
+    large_decrease:
+      - betraying the audience's goodwill
+      - breaking the bit in a way that feels like cheating
+    effect_thresholds:
+      0:
+        name: Hostile
+        sentence: "The audience despises %CHARACTER%; every vote will break against them."
+        effect: Curveballs and votes tilt against the contestant
+      20:
+        name: Heckling
+        sentence: "The audience is heckling %CHARACTER% at every opportunity."
+        effect: Unfavorable votes
+      40:
+        name: Cool
+        sentence: "The audience is cool on %CHARACTER%."
+        effect: Neutral crowd
+      60:
+        name: Warming
+        sentence: "The audience is warming to %CHARACTER%."
+        effect: Slightly favorable votes
+      80:
+        name: Fans
+        sentence: "%CHARACTER% has real fans now, and the crowd tilts their way."
+        effect: Favorable Curveballs; Sponsors circle
+      100:
+        name: Adored
+        sentence: "%CHARACTER% is adored, and Sponsors are climbing over each other to attach."
+        effect: Strongly favorable crowd
+  legacy:
+    name: Legacy
+    description: Season-long status — the climb from slush to legend. Accrues across Episodes toward the finale and the Off-Air option, and is what Cancellation burns. Moves slowly, mostly on Episode outcomes.
+    related_attribute: charisma
+    player: true
+    party: false
+    non_party: false
+    icon: 🏆
+    color: "#AF52DE"
+    min: 0
+    max: 100
+    initial: 10
+    change_per_minute: 0
+    relative_to_level: false
+    need_values:
+      small: 4
+      medium: 10
+      large: 20
+    small_increase:
+      - a memorable Episode beat that will be remembered next season
+    medium_increase:
+      - surviving a genuinely tough Episode
+    large_increase:
+      - a legendary, career-defining moment
+    fill_completely:
+      - clearing a season finale
+    small_decrease:
+      - a forgettable, reputation-eroding stretch
+    large_decrease:
+      - being Cancelled
+    effect_thresholds:
+      0:
+        name: Nobody
+        sentence: "%CHARACTER% is a nobody — pure slush, no reputation at all."
+        effect: No standing
+      25:
+        name: Slush
+        sentence: "%CHARACTER% is slush-pile talent, barely on the call sheet."
+        effect: Bottom of the card
+      50:
+        name: MidCard
+        sentence: "%CHARACTER% is mid-card now — a name the audience half-remembers."
+        effect: Established but not headlining
+      75:
+        name: Headliner
+        sentence: "%CHARACTER% is a headliner, and the season finale is within reach."
+        effect: Finale unlocked soon
+      100:
+        name: Legend
+        sentence: "%CHARACTER% is a legend, and the Off-Air door stands unlocked."
+        effect: Off-Air option available
