@@ -361,6 +361,8 @@ mods:
     enabled: true
   curiouser-rivals:
     enabled: true
+  curiouser-segments:
+    enabled: true
   # sceneIllustration:
   #   additional_instructions:
 

@@ -253,6 +253,13 @@ module.exports.register = function register(scope) {
     res.json({ success: true, applied: Boolean(host), host });
   });
 
+  // Cross-mod bridge: expose the active Episode/Format/House Rule so other mods
+  // (e.g. segments) can theme and gate off it. No-op safe if never read.
+  global.CURIOUSER_HOOKS = global.CURIOUSER_HOOKS || {};
+  global.CURIOUSER_HOOKS.getActiveEpisode = function getActiveEpisode() {
+    return { episode: state.episode, format: state.format || null, activeMechanic: state.activeMechanic || null };
+  };
+
   // POST /episode/renewal-check — Renewed / On the Bubble / Cancelled
   registerModRoute('post', '/episode/renewal-check', (req, res) => {
     const player = requireGame(res);
