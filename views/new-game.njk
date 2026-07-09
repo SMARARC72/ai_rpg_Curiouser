@@ -97,6 +97,9 @@ Region exits: [comma-separated list of connected regions]{%- endset %}
     {% if defaultPlayerRace and not raceInOptions %}
         {% set raceOtherValue = defaultPlayerRace %}
     {% endif %}
+    {% if modStyles %}{% for mod in modStyles %}{% for style in mod.styles %}
+    <link rel="stylesheet" href="{{ style }}">
+    {% endfor %}{% endfor %}{% endif %}
 </head>
 <body class="new-game-page">
     <div class="container">

@@ -6,6 +6,9 @@
     <title>{{ title | default("Lorebook Manager") }}</title>
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/lorebooks.css">
+    {% if modStyles %}{% for mod in modStyles %}{% for style in mod.styles %}
+    <link rel="stylesheet" href="{{ style }}">
+    {% endfor %}{% endfor %}{% endif %}
 </head>
 <body>
     <div class="container">

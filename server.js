@@ -25514,6 +25514,16 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '20mb' }));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use(express.static('public'));
 
+// Enabled-mod client stylesheets, for injecting the Curiouser theme (and any
+// other mod CSS) into EVERY page <head>, not just the main chat view. Returns []
+// when the mod loader isn't ready. Styles only — mod client scripts assume the
+// index DOM, so we deliberately do not inject them into the secondary pages.
+function getPageModStyles() {
+    return (typeof apiScope !== 'undefined' && apiScope.modLoader && typeof apiScope.modLoader.getModClientStyles === 'function')
+        ? apiScope.modLoader.getModClientStyles()
+        : [];
+}
+
 // Route for AI RPG Chat Interface
 app.get('/', (req, res) => {
     //const systemPrompt = renderSystemPrompt(currentSetting);
@@ -25566,7 +25576,8 @@ app.get('/new-game', (req, res) => {
         title: 'Start New Game',
         currentPage: 'new-game',
         newGameDefaults,
-        currentSetting: activeSetting
+        currentSetting: activeSetting,
+        modStyles: getPageModStyles()
     });
 });
 
@@ -25603,7 +25614,8 @@ app.get('/config', (req, res) => {
         gameConfigOverrideYaml: typeof Globals.getGameConfigOverrideYaml === 'function'
             ? Globals.getGameConfigOverrideYaml()
             : '',
-        gameLoaded: Globals.gameLoaded === true
+        gameLoaded: Globals.gameLoaded === true,
+        modStyles: getPageModStyles()
     });
 });
 
@@ -25945,7 +25957,8 @@ app.get('/settings', (req, res) => {
         currentPage: 'settings',
         defaultExistingSkills,
         defaultExistingSkillsError,
-        defaultFactionCountFallback
+        defaultFactionCountFallback,
+        modStyles: getPageModStyles()
     });
 });
 
@@ -25953,7 +25966,8 @@ app.get('/settings', (req, res) => {
 app.get('/lorebooks', (req, res) => {
     res.render('lorebooks.njk', {
         title: 'Lorebook Manager',
-        currentPage: 'lorebooks'
+        currentPage: 'lorebooks',
+        modStyles: getPageModStyles()
     });
 });
 

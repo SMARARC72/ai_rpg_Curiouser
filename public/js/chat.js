@@ -1372,9 +1372,9 @@ class AIRPGChat {
             const placeholder = document.createElement('div');
             placeholder.className = 'message ai-message';
             placeholder.innerHTML = `
-                <div class="message-sender">🤖 AI Game Master</div>
+                <div class="message-sender">🎙️ The Host</div>
                 <div class="message-actions" hidden></div>
-                <div>Welcome to the AI RPG! I\'m your Game Master. Configure your AI settings above, then click Game Settings to set up your world, and finally click New Game.</div>
+                <div>Welcome to CURIOUSER, contestant — you\'re live on the air! I\'m your Host. Set your key in Configuration, shape your world in Game Settings, then hit New Game to step into the lights. Delight the audience… or we\'re both Cancelled.</div>
             `;
             this.chatLog.appendChild(placeholder);
         } else {

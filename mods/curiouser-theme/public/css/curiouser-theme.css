@@ -1,222 +1,343 @@
 /*
  * Curiouser — Comic-book / Ink theme.
+ * ------------------------------------------------------------------------
+ * A single CSS overlay, injected (last) into EVERY page's <head> by the mod
+ * system, that restyles the stock ai_rpg UI — a dark purple "glass" theme —
+ * into a printed comic page: cream paper with a halftone wash, heavy black
+ * ink borders with hard offset shadows, a comic display face for headings and
+ * controls, and speech-bubble chat panels.
  *
- * A CSS overlay (injected globally by the mod system, after main.css) that
- * restyles the stock ai_rpg UI into a comic page: cream paper with a halftone
- * wash, heavy black ink borders with hard offset shadows, a comic display face
- * for headings/labels, and speech-bubble-style chat panels. No DOM changes —
- * pure theming, reversible by disabling the mod.
+ * The base stylesheet (main.css) is compiled from SCSS, so its colors are
+ * baked-in literals (not CSS variables) — there is no token layer to swap.
+ * We therefore restyle concrete selectors directly, and use !important where
+ * the base rule is a two-class compound (.btn.btn-primary, .message.ai-message)
+ * or ships its own !important. Class names are taken from the live markup.
  *
- * Because the base UI is a dark translucent theme, we flip surfaces to paper and
- * text to ink; !important is used deliberately to win over the base rules.
+ * Pure theming — no DOM changes. Disable the mod to revert.
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:ital,wght@0,400;0,700;1,400&display=swap');
 
 :root {
   --cur-ink: #17130d;
+  --cur-ink-soft: rgba(23, 19, 13, 0.66);
   --cur-paper: #f4ead3;
   --cur-paper-2: #fbf5e6;
-  --cur-paper-3: #efe2c5;
+  --cur-paper-3: #efe1c2;
   --cur-red: #e5322b;
   --cur-blue: #2664e6;
+  --cur-blue-soft: #dbe8ff;
   --cur-yellow: #ffd23f;
+  --cur-green: #3fb562;
   --cur-pink: #ff5da2;
-  --cur-shadow: #17130d;
   --cur-border: 3px solid var(--cur-ink);
-  --cur-hard: 5px 5px 0 var(--cur-ink);
-  --cur-hard-sm: 3px 3px 0 var(--cur-ink);
-  --cur-display: 'Bangers', 'Comic Sans MS', system-ui, cursive;
+  --cur-border-2: 2px solid var(--cur-ink);
+  --cur-hard: 6px 6px 0 var(--cur-ink);
+  --cur-hard-sm: 4px 4px 0 var(--cur-ink);
+  --cur-hard-xs: 2px 2px 0 var(--cur-ink);
+  --cur-radius: 10px;
+  --cur-display: 'Bangers', 'Arial Black', 'Segoe UI', system-ui, sans-serif;
   --cur-body: 'Comic Neue', 'Segoe UI', system-ui, sans-serif;
 
-  /* Retheme the base modal variables to comic ink-on-paper. */
+  /* The only real CSS vars in the base — recolor all modal chrome cheaply. */
   --airpg-modal-backdrop: rgba(23, 19, 13, 0.55);
   --airpg-modal-surface: var(--cur-paper-2);
   --airpg-modal-border: var(--cur-ink);
   --airpg-modal-shadow: var(--cur-hard);
   --airpg-modal-header: var(--cur-yellow);
   --airpg-modal-text: var(--cur-ink);
-  --airpg-modal-muted: rgba(23, 19, 13, 0.7);
+  --airpg-modal-muted: var(--cur-ink-soft);
 }
 
-/* ---- Paper + halftone background ------------------------------------------ */
+/* ============================================================ *
+ * 1. Page canvas — paper + halftone, everywhere
+ * ============================================================ */
 html, body {
-  background: var(--cur-paper) !important;
+  background-color: var(--cur-paper) !important;
   background-image:
-    radial-gradient(rgba(23, 19, 13, 0.07) 1px, transparent 1.6px) !important;
-  background-size: 14px 14px !important;
+    radial-gradient(rgba(23, 19, 13, 0.08) 1px, transparent 1.7px) !important;
+  background-size: 15px 15px !important;
   color: var(--cur-ink) !important;
   font-family: var(--cur-body) !important;
 }
+/* new-game page paints a translucent-white .page-section over a body override */
+body.new-game-page { background-attachment: fixed; }
 
-body { font-weight: 400; }
-
-/* Broadly bring text to ink on the paper (base used light-on-dark). */
-p, span, div, li, td, th, label, a, small, strong, em, dd, dt, h1, h2, h3, h4, h5, h6 {
+p, span, div, li, td, th, label, small, strong, em, dd, dt,
+h1, h2, h3, h4, h5, h6, figcaption, summary, legend, caption {
   color: var(--cur-ink);
 }
 a { color: var(--cur-blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-/* ---- Display type for headings + labels ----------------------------------- */
+/* ---- Display type ---- */
 h1, h2, h3, h4,
 .chat-sidebar-heading, .message-sender, .modal__header, .tab-button,
-.map-header, .npc-edit-section-header, .faction-section-header,
-.crafting-modal__section-header, .thing-modifier-header {
+.map-header, .map-title, .npc-edit-section-header, .faction-section-header,
+.faction-detail-header, .factions-sidebar-header, .quest-panel-header,
+.party-header, .story-tools-header, .library-header, .details-header,
+.crafting-modal__section-header, .thing-modifier-header, .editor-intro h1,
+.popup-card__title {
   font-family: var(--cur-display) !important;
-  letter-spacing: 0.5px;
   font-weight: 400;
+  letter-spacing: 0.6px;
 }
-h1 { font-size: 2.4rem; }
-h2 { font-size: 1.9rem; }
-h3 { font-size: 1.5rem; }
+h1 { font-size: 2.5rem; line-height: 1.05; }
+h2 { font-size: 1.85rem; }
+h3 { font-size: 1.45rem; }
+h4 { font-size: 1.2rem; }
 
-/* ---- Panels / cards / sidebars: ink-bordered paper with hard shadow ------- */
-[class*="panel"], [class*="card"], [class*="sidebar"], [class*="container"],
-.tab-panel, .map-panel, .modal, .modal__content, .quest-confirmation,
-.tooltip-thing-stack-card, .world-time-indicator--sidebar {
+/* The top page banner reads like a comic logo plate. */
+.header {
+  background: var(--cur-yellow) !important;
+  border: var(--cur-border) !important;
+  border-radius: var(--cur-radius) !important;
+  box-shadow: var(--cur-hard-sm) !important;
+  color: var(--cur-ink) !important;
+}
+.header h1 { color: var(--cur-ink) !important; text-shadow: 2px 2px 0 rgba(255,255,255,0.35); }
+
+/* ============================================================ *
+ * 2. Surfaces — ink-bordered paper panels with hard shadows
+ * ============================================================ */
+.container, .main-content, .adventure-content, .chat-wrapper {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+.chat-container, .chat-sidebar, .location-block, .location-content,
+.location-info, .location-section, .location-exits-content,
+.map-panel, .world-map-panel, .map-placeholder,
+.config-content, .config-section, .character-panel, .config-tab-panels,
+.quest-panel, .quest-accordion, .factions-panel, .factions-sidebar,
+.faction-detail, .party-panel, .story-tools-panel, .story-tools-layout,
+.settings-workspace, .settings-library-panel, .settings-editor-panel,
+.selected-setting-panel, .setting-item, .lorebooks-list, .lorebook-details,
+.lorebook-item, .entry-item, .page-section, .chat-player-card,
+.skill-card, .ability-card, .faction-list, .world-time-indicator--sidebar,
+.tooltip-thing-stack-card, .popup-card {
   background: var(--cur-paper-2) !important;
   color: var(--cur-ink) !important;
   border: var(--cur-border) !important;
-  border-radius: 8px !important;
+  border-radius: var(--cur-radius) !important;
   box-shadow: var(--cur-hard-sm) !important;
+  backdrop-filter: none !important;
+}
+/* Nested cards get a lighter frame so panels-in-panels don't look noisy. */
+.location-section, .location-exits-content, .skill-card, .ability-card,
+.setting-item, .entry-item, .world-time-indicator--sidebar {
+  box-shadow: var(--cur-hard-xs) !important;
+}
+/* Force readable ink over the base's light-on-dark body text. */
+.chat-sidebar *:not(a):not(.message-sender):not(.chat-player-action-label),
+.location-block *:not(a), .config-content *:not(a):not(input):not(textarea):not(select),
+.settings-workspace *:not(a):not(input):not(textarea):not(select),
+.lorebooks-grid *:not(a):not(input):not(textarea):not(select),
+.quest-panel *:not(a), .factions-panel *:not(a), .party-panel *:not(a),
+.story-tools-panel *:not(a), .page-section *:not(a):not(input):not(textarea):not(select) {
+  color: var(--cur-ink);
+}
+.help-text, .location-hint, .setting-meta, .details-meta, .meta-item,
+.chat-player-description, .quest-panel-subtitle, .factions-subtitle,
+.message-timestamp, .editor-intro p, .selected-setting-description {
+  color: var(--cur-ink-soft) !important;
 }
 
-/* Keep layout containers from getting a heavy frame if they're structural. */
-body > .container, body > div[class*="app"] {
-  border: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-}
-
-/* ---- Buttons: bold comic keys, hard shadow, press animation --------------- */
-button, .btn, .button, .tab-button,
-.btn-primary, .btn-secondary, .button-primary, .button-secondary,
-.chat-player-action-button, .npc-edit-add-btn, .location-npc-add-button,
-.location-thing-add-button, .npc-edit-save-btn, .npc-adjustment-save-btn {
+/* ============================================================ *
+ * 3. Tabs — the "on-air" channel selector
+ * ============================================================ */
+.tab-bar, .config-page-tabs, .editor-tabs { border: none !important; gap: 8px; }
+.tab-button, .editor-tab-btn {
   font-family: var(--cur-display) !important;
   letter-spacing: 0.6px;
   color: var(--cur-ink) !important;
   background: var(--cur-paper-3) !important;
-  border: var(--cur-border) !important;
+  border: var(--cur-border-2) !important;
   border-radius: 8px !important;
-  box-shadow: var(--cur-hard-sm) !important;
+  box-shadow: var(--cur-hard-xs) !important;
+  text-transform: uppercase;
+}
+.tab-button.active, .tab-button[aria-selected="true"],
+.editor-tab-btn.is-active, .tab-button.is-active {
+  background: var(--cur-red) !important;
+  color: #fff !important;
+  box-shadow: var(--cur-hard-xs) !important;
+}
+
+/* ============================================================ *
+ * 4. Buttons — bold comic keys with a real press
+ * ============================================================ */
+button, .btn, .send-button, .map-action-button, .skill-increase-btn,
+.chat-player-action-button, .npc-edit-add-btn, .location-npc-add-button,
+.location-thing-add-button, .location-exit-add-button, .btn-small-action,
+.entity-context-menu-button, .modal__close {
+  font-family: var(--cur-display) !important;
+  letter-spacing: 0.6px;
+  color: var(--cur-ink) !important;
+  background: var(--cur-paper-3) !important;
+  border: var(--cur-border-2) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--cur-hard-xs) !important;
   text-transform: uppercase;
   transition: transform 0.05s ease, box-shadow 0.05s ease;
 }
-button:hover, .btn:hover, .button:hover, .tab-button:hover,
-.btn-primary:hover, .btn-secondary:hover {
+button:hover, .btn:hover, .send-button:hover, .map-action-button:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0 var(--cur-ink) !important;
+  box-shadow: var(--cur-hard-sm) !important;
 }
-button:active, .btn:active, .button:active {
+button:active, .btn:active, .send-button:active {
   transform: translate(2px, 2px);
   box-shadow: 1px 1px 0 var(--cur-ink) !important;
 }
-.btn-primary, .button-primary { background: var(--cur-yellow) !important; }
-.btn-secondary, .button-secondary { background: var(--cur-blue) !important; color: #fff !important; }
-.quest-abandon-button { background: var(--cur-red) !important; color: #fff !important; }
+/* Variant fills (compound selectors to beat the base compounds). */
+.btn.btn-primary, .btn.button-primary { background: var(--cur-yellow) !important; color: var(--cur-ink) !important; }
+.btn.btn-secondary { background: var(--cur-blue) !important; color: #fff !important; }
+.btn.btn-accent, .send-button { background: var(--cur-red) !important; color: #fff !important; border: var(--cur-border) !important; }
+.btn.btn-danger, .quest-abandon-button, .modal__footer .btn-danger { background: var(--cur-red) !important; color: #fff !important; }
+/* The active nav button lives on the yellow header plate — yellow-on-yellow
+   washes out, so make the current page red. Form primary buttons (on paper)
+   keep their yellow fill. */
+.header .btn.btn-primary, .nav-buttons .btn.btn-primary { background: var(--cur-red) !important; color: #fff !important; }
 
-/* Active tab reads as the "on-air" panel. */
-.tab-button.active, .tab-button[aria-selected="true"] {
-  background: var(--cur-red) !important;
-  color: #fff !important;
-  box-shadow: var(--cur-hard-sm) !important;
-}
-
-/* ---- Chat: the Host speaks in caption/bubble panels ----------------------- */
+/* ============================================================ *
+ * 5. Chat — the Host and cast speak in comic panels
+ * ============================================================ */
+.chat-log { gap: 14px; }
 .message {
   background: var(--cur-paper-2) !important;
   border: var(--cur-border) !important;
-  border-radius: 12px !important;
+  border-radius: 14px !important;
   box-shadow: var(--cur-hard-sm) !important;
   color: var(--cur-ink) !important;
-  padding: 12px 14px !important;
+  padding: 12px 15px !important;
 }
 .message-sender {
   color: var(--cur-red) !important;
   text-transform: uppercase;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
 }
-.message-timestamp { color: rgba(23, 19, 13, 0.55) !important; font-family: var(--cur-body) !important; }
-/* Assistant (Host) vs player, if the base tags roles. */
-.message.assistant, .message[data-role="assistant"], .message.ai {
-  background: var(--cur-yellow) !important;
-}
-.message.user, .message[data-role="user"], .message.player {
-  background: #dbe8ff !important;
-}
+.message-timestamp { font-family: var(--cur-body) !important; }
+/* Role colors — real class names: ai-message / user-message / npc-message. */
+.message.ai-message { background: var(--cur-yellow) !important; }
+.message.user-message { background: var(--cur-blue-soft) !important; }
+.message.npc-message { background: #d9f2df !important; }
+.message.npc-message .message-sender { color: #1f7a3d !important; }
+.message.event-summary-batch { background: var(--cur-paper-3) !important; }
+.message.error { background: #ffd6d2 !important; border-color: var(--cur-red) !important; }
+.message.error .message-sender { color: var(--cur-red) !important; }
+.message.loading { background: var(--cur-paper-2) !important; }
 
-/* ---- Inputs ---------------------------------------------------------------- */
-input, textarea, select {
+/* Input row */
+.input-area { gap: 10px; }
+.message-input, #messageInput {
   background: #fff !important;
   color: var(--cur-ink) !important;
   border: var(--cur-border) !important;
+  border-radius: var(--cur-radius) !important;
+  font-family: var(--cur-body) !important;
+}
+
+/* ============================================================ *
+ * 6. Forms — inputs, selects, textareas
+ * ============================================================ */
+input, textarea, select,
+.attribute-input, .skill-add-input, .game-config-override-textarea {
+  background: #fff !important;
+  color: var(--cur-ink) !important;
+  border: var(--cur-border-2) !important;
   border-radius: 8px !important;
   font-family: var(--cur-body) !important;
-  box-shadow: inset 2px 2px 0 rgba(23, 19, 13, 0.08) !important;
+  box-shadow: inset 2px 2px 0 rgba(23, 19, 13, 0.07) !important;
 }
 input:focus, textarea:focus, select:focus {
   outline: none !important;
+  border-color: var(--cur-red) !important;
   box-shadow: 3px 3px 0 var(--cur-red) !important;
 }
-::placeholder { color: rgba(23, 19, 13, 0.45) !important; }
+::placeholder { color: rgba(23, 19, 13, 0.42) !important; }
+.form-group label, .field-grid label {
+  font-family: var(--cur-display) !important;
+  letter-spacing: 0.5px;
+  color: var(--cur-ink) !important;
+  text-transform: uppercase;
+  font-size: 1.05rem;
+}
+.form-static-value {
+  background: var(--cur-paper-3) !important;
+  border: var(--cur-border-2) !important;
+  border-radius: 8px !important;
+  color: var(--cur-ink) !important;
+}
 
-/* ---- Modals ---------------------------------------------------------------- */
+/* ============================================================ *
+ * 7. Modals
+ * ============================================================ */
+.modal__dialog, .modal__content {
+  background: var(--cur-paper-2) !important;
+  border: var(--cur-border) !important;
+  border-radius: var(--cur-radius) !important;
+  box-shadow: var(--cur-hard) !important;
+  color: var(--cur-ink) !important;
+}
 .modal__header {
   background: var(--cur-yellow) !important;
   color: var(--cur-ink) !important;
   border-bottom: var(--cur-border) !important;
   text-transform: uppercase;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
+}
+.modal__body, .modal__footer, .modal__instruction { color: var(--cur-ink) !important; }
+.modal-backdrop, .overlay-backdrop { background: rgba(23, 19, 13, 0.55) !important; }
+
+/* ============================================================ *
+ * 8. Per-screen specifics
+ * ============================================================ */
+/* new-game: the base paints .page-section translucent-white via inline <style>. */
+.page-section {
+  background: var(--cur-paper-2) !important;
+  color: var(--cur-ink) !important;
+  border: var(--cur-border) !important;
+  border-radius: var(--cur-radius) !important;
+  box-shadow: var(--cur-hard) !important;
+}
+.overlay-content { background: var(--cur-paper-2) !important; border: var(--cur-border) !important; border-radius: var(--cur-radius) !important; box-shadow: var(--cur-hard) !important; }
+.overlay-text { color: var(--cur-ink) !important; }
+.spinner { border-color: var(--cur-paper-3) !important; border-top-color: var(--cur-red) !important; }
+
+/* settings library items + badges */
+.setting-badge { background: var(--cur-blue) !important; color: #fff !important; border: var(--cur-border-2) !important; border-radius: 6px !important; }
+.setting-item.is-selected, .setting-item[aria-selected="true"] { background: var(--cur-yellow) !important; }
+
+/* lorebooks: entry cards + badges (lorebooks.css also redefines .btn/.modal — we load after it) */
+.badge, .entry-badges .badge { background: var(--cur-paper-3) !important; border: var(--cur-border-2) !important; border-radius: 6px !important; color: var(--cur-ink) !important; }
+.badge-constant { background: var(--cur-yellow) !important; }
+.badge-priority { background: var(--cur-blue) !important; color: #fff !important; }
+.badge-disabled { background: var(--cur-paper-3) !important; color: var(--cur-ink-soft) !important; }
+.lorebook-item.active, .lorebook-item.is-active { background: var(--cur-yellow) !important; }
+.empty-state, .quest-empty, .party-empty, .abilities-empty, .faction-empty,
+.location-npc-empty, .no-exits, .story-tools-empty {
+  color: var(--cur-ink-soft) !important;
 }
 
-/* ---- Scrollbars ------------------------------------------------------------ */
+/* status banners */
+.status-message.success, #statusMessage.success { background: #d9f2df !important; border: var(--cur-border-2) !important; color: var(--cur-ink) !important; border-radius: 8px !important; }
+.status-message.error, #statusMessage.error { background: #ffd6d2 !important; border: var(--cur-border-2) !important; color: var(--cur-ink) !important; border-radius: 8px !important; }
+
+/* plausibility popup cards in the chat */
+.popup-card__header { border-bottom: var(--cur-border-2) !important; }
+.popup-card__badge { border: var(--cur-border-2) !important; border-radius: 6px !important; font-family: var(--cur-display) !important; text-transform: uppercase; }
+.popup-card__title { color: var(--cur-ink) !important; }
+
+/* ============================================================ *
+ * 9. Scrollbars
+ * ============================================================ */
 * { scrollbar-color: var(--cur-ink) var(--cur-paper-3); }
 ::-webkit-scrollbar { width: 12px; height: 12px; }
 ::-webkit-scrollbar-track { background: var(--cur-paper-3); }
-::-webkit-scrollbar-thumb { background: var(--cur-ink); border-radius: 8px; border: 2px solid var(--cur-paper-3); }
-
-/* ---- Refinements: clear dark->light leftovers ----------------------------- */
-/* Sidebar sections, location blocks, config + time indicator -> paper. */
-.chat-sidebar, .character-panel, .chat-player-section, .chat-party-section,
-.factions-sidebar, .config-content, .config-section,
-.location-block, .location-content, .location-details, .location-exits,
-.location-exits-content, .location-header, .location-entity-grid,
-[class*="world-time"], [class*="collapsible"], [class*="-section"] {
-  background: var(--cur-paper-2) !important;
-  color: var(--cur-ink) !important;
-}
-/* Force readable ink on text the base drew light (stats, hints, time subtext). */
-.chat-sidebar *:not(a):not(.message-sender),
-[class*="world-time"] *,
-.location-hint, .location-details, .form-static-value {
-  color: var(--cur-ink) !important;
-}
-/* Buttons the main selector missed. */
-[class*="add-button"], [class*="-btn"], .location-exit-add-button {
-  font-family: var(--cur-display) !important;
-  color: var(--cur-ink) !important;
-  background: var(--cur-paper-3) !important;
-  border: var(--cur-border) !important;
-  border-radius: 8px !important;
-  box-shadow: var(--cur-hard-sm) !important;
-  text-transform: uppercase;
-}
-
-/* Section headers/labels the base drew light -> ink (but not the Host sender). */
-[class*="header"]:not(.modal__header):not(.message-sender),
-[class*="heading"], [class*="-title"], [class*="-label"], summary, legend {
-  color: var(--cur-ink) !important;
-}
-/* Empty-state / muted text -> readable muted ink. */
-[class*="empty"], [class*="muted"], [class*="placeholder"], [class*="hint"],
-[class*="no-"] {
-  color: rgba(23, 19, 13, 0.68) !important;
-}
-
-/* ---- A little cover-banner flourish on the main heading ------------------- */
-h1:first-of-type::after {
-  content: " ✦";
-  color: var(--cur-red);
+::-webkit-scrollbar-thumb {
+  background: var(--cur-ink);
+  border-radius: 8px;
+  border: 2px solid var(--cur-paper-3);
 }
