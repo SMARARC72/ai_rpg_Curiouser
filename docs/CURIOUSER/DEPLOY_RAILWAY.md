@@ -24,7 +24,7 @@ wrapper bridges both and injects your provider keys from the Railway environment
    | `AI_ENDPOINT` | yes | OpenAI-compatible base URL (e.g. `https://nano-gpt.com/api/v1`). |
    | `AI_API_KEY` | yes | Your LLM key. Without it the server boots but turns fail. |
    | `AI_MODEL` | yes | A capable, XML-reliable model (GLM-4.x / Deepseek-V3.x / Kimi). |
-   | `IMAGE_ENGINE` | for images | `openai` (fast prototype), `nanogpt`, or `comfyui`. |
+   | `IMAGE_ENGINE` | for images | Exactly one bare token — `openai`, `nanogpt`, or `comfyui` (use `openai` for the fast prototype). Do **not** include a description like "openai (fast prototype)". |
    | `IMAGE_API_KEY` | for images | Image provider key. |
    | `IMAGE_ENDPOINT` | optional | Override image endpoint. |
    | `IMAGE_MODEL` | optional | Override image model. |

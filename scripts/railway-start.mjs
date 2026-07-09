@@ -61,7 +61,9 @@ if (deployMode || !fs.existsSync(configPath)) {
   if (env.AI_MODEL) config.ai.model = env.AI_MODEL;
 
   config.imagegen = config.imagegen || {};
-  if (env.IMAGE_ENGINE) config.imagegen.engine = env.IMAGE_ENGINE;
+  // Normalize to the bare engine token so a value like "openai (fast prototype)"
+  // (easy to paste from the docs) becomes "openai".
+  if (env.IMAGE_ENGINE) config.imagegen.engine = env.IMAGE_ENGINE.trim().split(/\s+/)[0].toLowerCase();
   if (env.IMAGE_API_KEY) config.imagegen.apiKey = env.IMAGE_API_KEY;
   if (env.IMAGE_ENDPOINT) config.imagegen.endpoint = env.IMAGE_ENDPOINT;
   if (env.IMAGE_MODEL) config.imagegen.model = env.IMAGE_MODEL;
