@@ -3,6 +3,45 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
+/*
+ * OpenAI's image models only accept a FIXED set of sizes — you cannot ask for
+ * arbitrary dimensions. Requesting anything else (e.g. a 1280x720 location map)
+ * makes the API reject the request, so that image silently never appears.
+ *
+ * Each model family offers a square, a portrait, and a landscape option; we snap
+ * whatever width/height the caller asked for to the closest one by orientation.
+ * That lets the game keep requesting natural dimensions per image type (wide
+ * maps, tall portraits, square items) and always get a valid, aspect-appropriate
+ * size back.
+ *   - gpt-image-1: 1024x1024, 1024x1536 (portrait), 1536x1024 (landscape)
+ *   - dall-e-3:    1024x1024, 1024x1792 (portrait), 1792x1024 (landscape)
+ *   - dall-e-2:    only square sizes (256/512/1024)
+ * Unknown/custom model names default to the gpt-image-1 set (the modern default).
+ */
+const OPENAI_SIZE_SETS = {
+  'gpt-image-1': { square: '1024x1024', portrait: '1024x1536', landscape: '1536x1024' },
+  'dall-e-3':    { square: '1024x1024', portrait: '1024x1792', landscape: '1792x1024' },
+  'dall-e-2':    { square: '1024x1024', portrait: '1024x1024', landscape: '1024x1024' }
+};
+
+function sizeSetForModel(model) {
+  const m = String(model || '').toLowerCase();
+  if (m.includes('dall-e-3') || m.includes('dalle-3') || m.includes('dall-e3') || m.includes('dalle3')) return OPENAI_SIZE_SETS['dall-e-3'];
+  if (m.includes('dall-e-2') || m.includes('dalle-2') || m.includes('dall-e2') || m.includes('dalle2')) return OPENAI_SIZE_SETS['dall-e-2'];
+  return OPENAI_SIZE_SETS['gpt-image-1'];
+}
+
+// Snap a requested width/height to the closest valid OpenAI size for the model.
+function resolveOpenAISize(model, width, height) {
+  const w = Number(width) > 0 ? Number(width) : 1024;
+  const h = Number(height) > 0 ? Number(height) : 1024;
+  const set = sizeSetForModel(model);
+  const ratio = w / h;
+  if (ratio >= 1.15) return set.landscape; // clearly wider than tall
+  if (ratio <= 0.87) return set.portrait;  // clearly taller than wide
+  return set.square;                        // roughly square
+}
+
 class OpenAIImageClient {
   constructor(config) {
     const engineConfig = config?.imagegen ?? {};
@@ -29,7 +68,9 @@ class OpenAIImageClient {
   async generateImage({ prompt, negativePrompt = '', width = 1024, height = 1024 }) {
     const requestId = this.generateRequestId();
 
-    const size = `${width}x${height}`;
+    // Snap the requested dimensions to a size the model actually accepts, chosen
+    // by orientation (wide maps → landscape, portraits → portrait, items → square).
+    const size = resolveOpenAISize(this.model, width, height);
     const combinedPrompt = negativePrompt
       ? `${prompt}\nNegative prompt: ${negativePrompt}`
       : prompt;
@@ -97,3 +138,5 @@ class OpenAIImageClient {
 }
 
 module.exports = OpenAIImageClient;
+module.exports.resolveOpenAISize = resolveOpenAISize;
+module.exports.OPENAI_SIZE_SETS = OPENAI_SIZE_SETS;
