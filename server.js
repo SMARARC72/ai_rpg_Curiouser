@@ -4978,7 +4978,7 @@ function buildBasePromptContext({
         }
     } else {
         console.warn('No location available to collect items in scene.');
-        console.trace();
+        if (config?.ai?.debug) console.trace();
     }
 
     const historyEntries = Array.isArray(chatHistory) ? chatHistory : [];
