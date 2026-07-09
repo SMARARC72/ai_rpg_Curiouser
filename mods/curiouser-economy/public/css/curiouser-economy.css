@@ -10,3 +10,18 @@
 .need-bar[data-bar-id="legacy"] {
   display: none !important;
 }
+
+/*
+ * On-air beats injected by public/js/curiouser-economy.js. They render as Host
+ * (ai-message) bubbles; a thick colored left rule flags the beat type so a
+ * Curveball reads differently from a Sponsor break or an Episode/stakes call.
+ * Colors fall back if the comic theme mod is disabled.
+ */
+.curiouser-beat {
+  border-left: 7px solid var(--cur-ink, #17130d) !important;
+  position: relative;
+}
+.curiouser-beat--curveball { border-left-color: var(--cur-red, #e5322b) !important; }
+.curiouser-beat--sponsor { border-left-color: var(--cur-blue, #2664e6) !important; }
+.curiouser-beat--episode,
+.curiouser-beat--stakes { border-left-color: var(--cur-ink, #17130d) !important; }
