@@ -204,12 +204,25 @@ module.exports.register = function register(scope) {
       state.onTheBubble = false;
       host = hostSay(`Renewed. ${Math.round(ratings)}% against a ${threshold}% bar — the audience wants more of you. Your Legacy ticks up. Next Episode when you're ready.`);
     } else if (state.onTheBubble) {
-      outcome = 'cancelled';
-      player.applyNeedBarChange('legacy', { direction: 'decrease', magnitude: 'large', reason: 'Cancelled' });
-      state.onTheBubble = false;
-      state.format = null;
-      state.cancelledCount += 1;
-      host = hostSay(`Cancelled. ${Math.round(ratings)}% and the bar was ${threshold}%. You're written out live — gloriously, the crowd's on its feet, half of them crying. Your Legacy burns. You can be rebooted at a lower tier: same soul, new season.`);
+      // The Prop Department's Panic Room (curiouser-workshop) can spend one
+      // Reboot Insurance to soften a Cancellation. Cross-mod, same process;
+      // no-ops if the workshop mod isn't loaded / has no insurance armed.
+      const panic = (typeof global !== 'undefined' && global.CURIOUSER_HOOKS && typeof global.CURIOUSER_HOOKS.tryConsumeRebootInsurance === 'function')
+        ? global.CURIOUSER_HOOKS.tryConsumeRebootInsurance()
+        : { saved: false };
+      if (panic && panic.saved) {
+        outcome = 'reboot_insurance';
+        state.onTheBubble = false;
+        state.format = null;
+        host = hostSay(`CANCELLED — and then the Panic Room kicks in. Reboot Insurance cashes out: a trapdoor of your own making drops you clear and you land, gasping, in one piece. ${Math.round(ratings)}% against a ${threshold}% bar — should've been the end, but your Legacy holds and the Vault's still yours. Do NOT waste the reprieve.`);
+      } else {
+        outcome = 'cancelled';
+        player.applyNeedBarChange('legacy', { direction: 'decrease', magnitude: 'large', reason: 'Cancelled' });
+        state.onTheBubble = false;
+        state.format = null;
+        state.cancelledCount += 1;
+        host = hostSay(`Cancelled. ${Math.round(ratings)}% and the bar was ${threshold}%. You're written out live — gloriously, the crowd's on its feet, half of them crying. Your Legacy burns. You can be rebooted at a lower tier: same soul, new season.`);
+      }
     } else {
       outcome = 'on_the_bubble';
       state.onTheBubble = true;

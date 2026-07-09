@@ -79,6 +79,8 @@
 .cw-sub { font-size: 0.85rem; color: var(--cur-ink-soft, rgba(23,19,13,0.66)); }
 .cw-cost { font-size: 0.8rem; font-weight: 700; }
 .cw-maxtag { font-family: var(--cur-display, 'Bangers', sans-serif); color: var(--cur-green, #3fb562); }
+.cw-armed { color: var(--cur-green, #3fb562); }
+.cw-spent { color: var(--cur-red, #e5322b); }
 .cw-empty { color: var(--cur-ink-soft, rgba(23,19,13,0.66)); font-style: italic; padding: 8px 0; }
 .cw-substore { display: flex; flex-direction: column; gap: 8px; }
 

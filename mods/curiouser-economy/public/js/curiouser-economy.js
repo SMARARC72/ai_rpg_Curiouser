@@ -99,7 +99,7 @@
       renderBeat(rc.host, 'stakes');
       // Renewed or Cancelled closes the Episode; On-the-Bubble keeps it open
       // for one more stretch (the route already threw the last-chance twist).
-      if (rc.outcome === 'renewed' || rc.outcome === 'cancelled') {
+      if (rc.outcome === 'renewed' || rc.outcome === 'cancelled' || rc.outcome === 'reboot_insurance') {
         return rollEpisode('episode');
       }
       turnsThisEpisode = 0; // bubble: give the contestant another run at the bar

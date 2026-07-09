@@ -156,6 +156,7 @@ module.exports.register = function register(scope) {
     return {
       parts,
       base: { stations: { workbench: 1, vault: 0, fabricator: 0, applause: 0, panic: 0 } },
+      rebootInsurance: 0,
       discoveredRecipes: [],
       vault: []
     };
@@ -170,6 +171,7 @@ module.exports.register = function register(scope) {
           if (parsed.base && parsed.base.stations) Object.keys(s.base.stations).forEach(k => {
             if (Number.isFinite(parsed.base.stations[k])) s.base.stations[k] = parsed.base.stations[k];
           });
+          if (Number.isFinite(parsed.rebootInsurance)) s.rebootInsurance = parsed.rebootInsurance;
           if (Array.isArray(parsed.discoveredRecipes)) s.discoveredRecipes = parsed.discoveredRecipes.slice(0);
           if (Array.isArray(parsed.vault)) s.vault = parsed.vault.slice(0);
         }
@@ -292,6 +294,7 @@ module.exports.register = function register(scope) {
         buildable: p ? (inkOf(p) >= s.ink && partsCan(s.parts)) : false })),
       vault: state.vault.map((v, i) => ({ index: i, name: v.name, rarity: v.rarity || (v.metadata && v.metadata.rarity) || 'common' })),
       vaultSlots: stationLevel('vault') * 4,
+      rebootInsurance: state.rebootInsurance || 0,
       inventory: p ? inventoryItems(p).map(t => ({ id: t.id, name: t.name, rarity: itemRarity(t), value: itemValue(t) })) : []
     };
   }
@@ -450,6 +453,8 @@ module.exports.register = function register(scope) {
     partsSpend(partsCost);
     if (typeof p.adjustCurrency === 'function') p.adjustCurrency(-inkCost);
     state.base.stations[station] = target;
+    // Building the Panic Room arms its first Reboot Insurance.
+    if (station === 'panic' && target >= 1) state.rebootInsurance = Math.max(state.rebootInsurance || 0, 1);
     saveState();
 
     const host = hostSay(`Green Room upgrade: ${info.name} is now level ${target}. ${info.blurb} The trailer\'s looking almost respectable.`);
@@ -473,6 +478,34 @@ module.exports.register = function register(scope) {
     const host = hostSay(`You crank the Applause Sign. The crowd obliges — ${magnitude} swell of love, ${cost} Ink well spent. Milk it.`);
     res.json({ success: true, applied, magnitude, host });
   });
+
+  // POST /base/panic/restock — reload the Panic Room's Reboot Insurance
+  registerModRoute('post', '/base/panic/restock', (req, res) => {
+    const p = requireGame(res); if (!p) return;
+    if (stationLevel('panic') < 1) return res.status(409).json({ success: false, error: 'Build a Panic Room in your Green Room first.' });
+    if ((state.rebootInsurance || 0) >= 1) return res.status(409).json({ success: false, error: 'Reboot Insurance is already armed.' });
+    const inkCost = 40; const partsCost = { inkcell: 2, cog: 1 };
+    if (inkOf(p) < inkCost) return res.status(409).json({ success: false, error: `Re-stocking costs ${inkCost} Ink.` });
+    if (!partsCan(partsCost)) return res.status(409).json({ success: false, error: `Short on parts: needs ${fmtCost(partsCost)}.` });
+    partsSpend(partsCost);
+    if (typeof p.adjustCurrency === 'function') p.adjustCurrency(-inkCost);
+    state.rebootInsurance = 1;
+    saveState();
+    const host = hostSay('Panic Room re-stocked: one Reboot Insurance, armed and blinking. Sleep a little easier — or don\'t, the Audience prefers you nervous.');
+    res.json({ success: true, rebootInsurance: 1, state: serializeState(p), host });
+  });
+
+  // Cross-mod bridge: the economy mod's Cancellation flow calls this to spend
+  // the Panic Room's Reboot Insurance for a soft landing (both mods share this
+  // process; the economy side no-ops if the hook is absent). Returns { saved }.
+  global.CURIOUSER_HOOKS = global.CURIOUSER_HOOKS || {};
+  global.CURIOUSER_HOOKS.tryConsumeRebootInsurance = function tryConsumeRebootInsurance() {
+    if ((state.base.stations.panic || 0) < 1) return { saved: false, reason: 'no_panic_room' };
+    if ((state.rebootInsurance || 0) < 1) return { saved: false, reason: 'empty' };
+    state.rebootInsurance = (state.rebootInsurance || 0) - 1;
+    saveState();
+    return { saved: true };
+  };
 
   // POST /vault/store {thingId} — stash an item across Episodes
   registerModRoute('post', '/vault/store', (req, res) => {

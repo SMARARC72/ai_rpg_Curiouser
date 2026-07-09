@@ -136,14 +136,24 @@
   function renderBase() {
     var base = (state && state.base && state.base.stations) || {};
     var info = (state && state.stationInfo) || {};
+    var insurance = (state && state.rebootInsurance) || 0;
     var rows = Object.keys(info).map(function (key) {
       var st = info[key]; var lvl = base[key] || 0;
       var maxed = lvl >= st.maxLevel;
-      return '<div class="cw-row' + (maxed ? ' cw-maxed' : '') + '"><div class="cw-row-main">' +
+      var sub = esc(st.blurb);
+      var control, dim = maxed;
+      if (key === 'panic' && lvl >= 1) {
+        sub += insurance >= 1 ? ' <b class="cw-armed">Insurance: ARMED</b>' : ' <b class="cw-spent">Insurance: SPENT</b>';
+        if (insurance >= 1) { control = '<span class="cw-maxtag">ARMED</span>'; }
+        else { control = '<button class="cw-btn cw-primary cw-restock">Restock (40 Ink)</button>'; dim = false; }
+      } else if (maxed) {
+        control = '<span class="cw-maxtag">MAX</span>';
+      } else {
+        control = '<button class="cw-btn cw-upgrade" data-station="' + esc(key) + '">Upgrade</button>';
+      }
+      return '<div class="cw-row' + (dim ? ' cw-maxed' : '') + '"><div class="cw-row-main">' +
         '<span class="cw-name">' + esc(st.name) + ' <span class="cw-lvl">L' + lvl + '/' + st.maxLevel + '</span></span>' +
-        '<span class="cw-sub">' + esc(st.blurb) + '</span></div>' +
-        (maxed ? '<span class="cw-maxtag">MAX</span>' : '<button class="cw-btn cw-upgrade" data-station="' + esc(key) + '">Upgrade</button>') +
-        '</div>';
+        '<span class="cw-sub">' + sub + '</span></div>' + control + '</div>';
     }).join('');
     var applause = (base.applause || 0) >= 1
       ? '<div class="cw-actionbar"><button class="cw-btn cw-primary cw-applause">📣 Crank Applause (15 Ink)</button><span class="cw-hint">Spend Ink for a burst of Audience Favor.</span></div>' : '';
@@ -187,6 +197,7 @@
     else if (t.classList.contains('cw-build') && !t.disabled) act('/build', { structureId: t.getAttribute('data-id') });
     else if (t.classList.contains('cw-upgrade')) act('/base/upgrade', { station: t.getAttribute('data-station') });
     else if (t.classList.contains('cw-applause')) act('/base/applause', {});
+    else if (t.classList.contains('cw-restock')) act('/base/panic/restock', {});
     else if (t.classList.contains('cw-store')) act('/vault/store', { thingId: t.getAttribute('data-id') });
     else if (t.classList.contains('cw-withdraw')) act('/vault/withdraw', { index: Number(t.getAttribute('data-index')) });
   }
