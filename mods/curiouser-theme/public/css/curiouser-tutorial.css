@@ -1,0 +1,132 @@
+/*
+ * Curiouser — tutorial / onboarding styling (paired with public/js/
+ * curiouser-tutorial.js). Uses the comic theme's CSS variables (with literal
+ * fallbacks so it survives even if the theme file's :root isn't present).
+ */
+
+.cur-tut-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(23, 19, 13, 0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+  padding: 20px;
+}
+
+.cur-tut-modal {
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  overflow: auto;
+  background: var(--cur-paper-2, #fbf5e6);
+  color: var(--cur-ink, #17130d);
+  border: 3px solid var(--cur-ink, #17130d);
+  border-radius: 12px;
+  box-shadow: 8px 8px 0 var(--cur-ink, #17130d);
+  font-family: var(--cur-body, 'Comic Neue', 'Segoe UI', system-ui, sans-serif);
+}
+
+.cur-tut-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--cur-yellow, #ffd23f);
+  border-bottom: 3px solid var(--cur-ink, #17130d);
+  padding: 12px 16px;
+}
+.cur-tut-title {
+  font-family: var(--cur-display, 'Bangers', 'Arial Black', sans-serif);
+  font-size: 1.7rem;
+  letter-spacing: 0.6px;
+  color: var(--cur-ink, #17130d);
+}
+.cur-tut-close {
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--cur-ink, #17130d);
+  padding: 4px 8px;
+}
+
+.cur-tut-body {
+  padding: 18px 20px 6px;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+.cur-tut-body b { color: var(--cur-red, #e5322b); }
+.cur-tut-list {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+.cur-tut-list li { margin: 6px 0; }
+
+.cur-tut-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding: 10px 0 4px;
+}
+.cur-tut-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--cur-ink, #17130d);
+  background: transparent;
+  cursor: pointer;
+}
+.cur-tut-dot.is-active { background: var(--cur-red, #e5322b); }
+
+.cur-tut-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px 18px;
+}
+.cur-tut-btn {
+  font-family: var(--cur-display, 'Bangers', 'Arial Black', sans-serif) !important;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: 3px solid var(--cur-ink, #17130d) !important;
+  border-radius: 8px !important;
+  box-shadow: 3px 3px 0 var(--cur-ink, #17130d) !important;
+  padding: 8px 16px !important;
+  cursor: pointer;
+  color: var(--cur-ink, #17130d) !important;
+  background: var(--cur-paper-3, #efe1c2) !important;
+  text-decoration: none;
+  transition: transform 0.05s ease, box-shadow 0.05s ease;
+}
+.cur-tut-btn:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--cur-ink, #17130d) !important; }
+.cur-tut-next { margin-left: auto; background: var(--cur-yellow, #ffd23f) !important; }
+.cur-tut-cta { background: var(--cur-red, #e5322b) !important; color: #fff !important; margin-left: auto; }
+.cur-tut-cta + .cur-tut-next { margin-left: 0; }
+
+/* Floating reopen button */
+.cur-tut-reopen {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 90000;
+  font-family: var(--cur-display, 'Bangers', 'Arial Black', sans-serif);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--cur-ink, #17130d);
+  background: var(--cur-yellow, #ffd23f);
+  border: 3px solid var(--cur-ink, #17130d);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--cur-ink, #17130d);
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: transform 0.05s ease, box-shadow 0.05s ease;
+}
+.cur-tut-reopen:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--cur-ink, #17130d); }
+
+@media (max-width: 640px) {
+  .cur-tut-title { font-size: 1.4rem; }
+  .cur-tut-reopen { padding: 6px 10px; font-size: 0.85rem; }
+}

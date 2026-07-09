@@ -25,3 +25,17 @@
 .curiouser-beat--sponsor { border-left-color: var(--cur-blue, #2664e6) !important; }
 .curiouser-beat--episode,
 .curiouser-beat--stakes { border-left-color: var(--cur-ink, #17130d) !important; }
+
+/* Sponsor break: the one beat the player answers directly. */
+.curiouser-sponsor-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.curiouser-sponsor-btn { cursor: pointer; }
+.curiouser-sponsor-take { background: var(--cur-yellow, #ffd23f) !important; }
+.curiouser-sponsor-pass { background: var(--cur-paper-3, #efe1c2) !important; }
+.curiouser-sponsor-actions.is-resolved { opacity: 0.55; }
+.curiouser-sponsor-btn:disabled { cursor: default; transform: none !important; box-shadow: 2px 2px 0 var(--cur-ink, #17130d) !important; }
+.curiouser-sponsor-result { margin-top: 8px; font-style: italic; }

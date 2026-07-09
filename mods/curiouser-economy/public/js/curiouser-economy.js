@@ -116,10 +116,79 @@
     }
     if (roll < CURVEBALL_CHANCE + SPONSOR_CHANCE) {
       return api('/sponsor').then(function (sp) {
-        if (sp && sp.success) renderBeat(sp.host, 'sponsor');
+        if (sp && sp.success && sp.sponsor) renderSponsorOffer(sp.sponsor, sp.host);
+        else if (sp && sp.success) renderBeat(sp.host, 'sponsor');
       });
     }
     return Promise.resolve();
+  }
+
+  // A Sponsor break renders with live Take/Pass controls (the only beat the
+  // player answers directly). Take -> /sponsor/accept (Ink in, string attached);
+  // Pass -> /sponsor/decline.
+  function renderSponsorOffer(sponsor, hostText) {
+    var logEl = chatLog();
+    if (!logEl || !sponsor) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'message ai-message curiouser-beat curiouser-beat--sponsor';
+
+    var sender = document.createElement('div');
+    sender.className = 'message-sender';
+    sender.textContent = SENDER;
+
+    var body = document.createElement('div');
+    body.textContent = hostText || (sponsor.name + ' wants to attach.');
+
+    var actions = document.createElement('div');
+    actions.className = 'curiouser-sponsor-actions';
+    var take = document.createElement('button');
+    take.type = 'button';
+    take.className = 'btn curiouser-sponsor-btn curiouser-sponsor-take';
+    take.textContent = 'Take the deal (+' + sponsor.ink + ' Ink)';
+    var pass = document.createElement('button');
+    pass.type = 'button';
+    pass.className = 'btn curiouser-sponsor-btn curiouser-sponsor-pass';
+    pass.textContent = 'Pass';
+
+    function settle(note) {
+      take.disabled = true;
+      pass.disabled = true;
+      actions.classList.add('is-resolved');
+      if (note) {
+        var n = document.createElement('div');
+        n.className = 'curiouser-sponsor-result';
+        n.textContent = note;
+        wrap.appendChild(n);
+      }
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    take.addEventListener('click', function () {
+      take.disabled = true;
+      pass.disabled = true;
+      fetch(BASE + '/sponsor/accept', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sponsor: sponsor.name })
+      }).then(function (r) { return r.json().catch(function () { return null; }); })
+        .then(function (res) { settle(res && res.host ? res.host : 'Deal done.'); })
+        .catch(function () { take.disabled = false; pass.disabled = false; });
+    });
+    pass.addEventListener('click', function () {
+      take.disabled = true;
+      pass.disabled = true;
+      api('/sponsor/decline').then(function (res) {
+        settle(res && res.host ? res.host : 'You wave the sponsor off.');
+      });
+    });
+
+    actions.appendChild(take);
+    actions.appendChild(pass);
+    wrap.appendChild(sender);
+    wrap.appendChild(body);
+    wrap.appendChild(actions);
+    logEl.appendChild(wrap);
+    logEl.scrollTop = logEl.scrollHeight;
   }
 
   function onTurnComplete() {

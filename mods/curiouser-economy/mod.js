@@ -247,6 +247,16 @@ module.exports.register = function register(scope) {
     if (!sponsor) {
       return res.status(409).json({ success: false, error: 'No sponsor on offer — POST /sponsor first.' });
     }
+    // If the client names a specific offer, make sure it's still the one on the
+    // table (a newer Sponsor break may have replaced it before they clicked).
+    const requested = req.body && typeof req.body.sponsor === 'string' ? req.body.sponsor.trim() : null;
+    if (requested && sponsor.name !== requested) {
+      return res.status(409).json({
+        success: false,
+        error: 'That offer has expired.',
+        host: hostSay(`Too slow — ${requested} walked. ${sponsor.name}'s the one holding the pen now.`)
+      });
+    }
     if (typeof player.adjustCurrency === 'function') player.adjustCurrency(sponsor.ink);
     state.activeSponsor = sponsor;
     state.pendingSponsor = null;
@@ -254,6 +264,18 @@ module.exports.register = function register(scope) {
     const balance = typeof player.currency === 'number' ? player.currency : null;
     const host = hostSay(`Sold. ${sponsor.name} pays out ${sponsor.ink} Ink${balance !== null ? ` (you're holding ${balance} now)` : ''}. The catch is live: ${sponsor.string}.`);
     res.json({ success: true, sponsor, inkBalance: balance, host });
+  });
+
+  // POST /sponsor/decline — turn down the pending sponsor, stay pure and broke
+  registerModRoute('post', '/sponsor/decline', (req, res) => {
+    if (!requireGame(res)) return;
+    const sponsor = state.pendingSponsor;
+    state.pendingSponsor = null;
+    saveState(state);
+    const host = hostSay(sponsor
+      ? `${sponsor.name} pulls the offer, wounded. Pure and broke it is — the audience respects that. Mostly.`
+      : `Nothing on the table to turn down.`);
+    res.json({ success: true, declined: sponsor ? sponsor.name : null, host });
   });
 
   console.log(`      🎪 Curiouser Economy mod loaded (Ratings/Favor/Legacy + Episode stakes)`);
