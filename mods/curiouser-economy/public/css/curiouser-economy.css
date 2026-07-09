@@ -27,6 +27,15 @@
 .curiouser-beat--stakes { border-left-color: var(--cur-ink, #17130d) !important; }
 .curiouser-beat--houserule { border-left-color: #e08a1a !important; }
 .curiouser-beat--houserule .message-sender { color: #b56a08 !important; }
+/* The pen breaking the format — a purple "off-format" flag. */
+.curiouser-beat--pen { border-left-color: #7a3ff2 !important; }
+.curiouser-beat--pen .message-sender { color: #6a2fd6 !important; }
+/* The Season Finale prize — a gold, once-a-season beat. */
+.curiouser-beat--offair {
+  border-left-color: var(--cur-yellow, #ffd23f) !important;
+  background: linear-gradient(180deg, rgba(255,210,63,0.10), transparent) !important;
+}
+.curiouser-beat--offair .message-sender { color: #b56a08 !important; }
 
 /* Sponsor break: the one beat the player answers directly. */
 .curiouser-sponsor-actions {
@@ -38,6 +47,10 @@
 .curiouser-sponsor-btn { cursor: pointer; }
 .curiouser-sponsor-take { background: var(--cur-yellow, #ffd23f) !important; }
 .curiouser-sponsor-pass { background: var(--cur-paper-3, #efe1c2) !important; }
+/* Curveball bend + Off-Air choices reuse the sponsor-action layout. */
+.curiouser-curveball-bend { background: var(--cur-red, #e5322b) !important; color: #fff !important; }
+.curiouser-offair-walk { background: var(--cur-yellow, #ffd23f) !important; }
+.curiouser-offair-resign { background: #7a3ff2 !important; color: #fff !important; }
 .curiouser-sponsor-actions.is-resolved { opacity: 0.55; }
 .curiouser-sponsor-btn:disabled { cursor: default; transform: none !important; box-shadow: 0 2px 8px rgba(20,20,26,0.14) !important; }
 .curiouser-sponsor-result { margin-top: 8px; font-style: italic; }

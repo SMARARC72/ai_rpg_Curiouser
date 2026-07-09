@@ -26,12 +26,12 @@ A **reskin + two mods** on top of the existing engine. Do **not** rewrite the en
 
 ## Build order
 
-See `docs/CURIOUSER/V0_BUILD_SCOPE.md`. Status: (0) engine running ✓ · (1) reskin as data ✓ · (2) economy mod ✓ · (3) comic-assembly mod ✓ · (4) character consistency (ComfyUI + IP-Adapter), drift-proofing, Host name/voice, season arc — **post-v0, needs a GPU/ComfyUI backend**. v0 (M0–M3) is Railway-deployable; see `docs/CURIOUSER/DEPLOY_RAILWAY.md`.
+See `docs/CURIOUSER/V0_BUILD_SCOPE.md`. Status: (0) engine running ✓ · (1) reskin as data ✓ · (2) economy mod ✓ · (3) comic-assembly mod ✓ · (3.5) enrichment mods ✓ (workshop loot/craft/build, ensemble living-world, rivals+standings, segments, director/comic-capture, House Rules mechanics, and the **Season arc**: Legacy tiers → Finale → Off-Air, the traveling pen, bendable Curveballs) · (4) character consistency (ComfyUI + IP-Adapter), drift-proofing, Host name/voice — **post-v0, needs a GPU/ComfyUI backend**. v0 (M0–M3) is Railway-deployable; see `docs/CURIOUSER/DEPLOY_RAILWAY.md`.
 
 ## Curiouser assets in this repo
 
 - **Reskin (M1):** `curiouser/setting/curiouser.setting.json` (Host voice + Ink + gameshow framing as data), `curiouser/lorebooks/curiouser-wonderland.json` (the Wonderland/gameshow lorebook), `curiouser/install-curiouser.mjs` (stages them into `saves/settings/` + `lorebooks/` and enables the lorebook), `curiouser/verify-reskin.mjs`, `curiouser/README.md`.
-- **Economy mod (M2):** `mods/curiouser-economy/` — Ratings / Audience Favor / Legacy as Host-spoken need bars (hidden from the UI so the Host is the HUD; survival bars stay visible), plus Episode stakes (Renewal Threshold → Renewed / On-the-Bubble / Cancelled / Reboot), Curveballs, and Sponsors as routes.
+- **Economy mod (M2):** `mods/curiouser-economy/` — Ratings / Audience Favor / Legacy as Host-spoken need bars (hidden from the UI so the Host is the HUD; survival bars stay visible), plus Episode stakes (Renewal Threshold → Renewed / On-the-Bubble / Cancelled / Reboot), Curveballs, and Sponsors as routes. **Season arc (post-v0):** Legacy tiers (slush → mid-card → headliner → legend) → a Season Finale → the Off-Air prize (Walk Off = the rare win, or Re-Sign for higher stakes); the traveling **pen** (survives every reboot, uncap once per Episode to break the House Rule); and bendable Curveballs (spend Ink to bend the audience vote your way).
 - **Comic mod (M3):** `mods/curiouser-comic/` — composite panel beats into multi-panel comic pages (caption boxes + speech bubbles via `sharp`) and export a self-contained HTML chapter. `verify-compose.mjs` proves the pipeline without a backend.
 - **Deploy:** `scripts/railway-start.mjs` + `railway.json` + `Procfile` + `docs/CURIOUSER/DEPLOY_RAILWAY.md` — one-deploy-playable on Railway (config from env, reskin auto-applied).
 

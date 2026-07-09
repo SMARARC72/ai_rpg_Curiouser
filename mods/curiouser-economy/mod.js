@@ -14,6 +14,15 @@
  * exposed as namespaced HTTP routes under /api/mods/curiouser-economy/... and
  * narrated in the Host's voice.
  *
+ * The Season arc closes the loop the bible calls "a novel, not a sketch pile":
+ * Legacy tiers (slush → mid-card → headliner → legend), a Season Finale that
+ * opens once you're a headliner with enough Renewals banked, and the Off-Air
+ * prize for clearing it — Walk Off (the rare win, like Del) or Re-Sign for a
+ * harder, richer season. The traveling pen — the one prop "not in the format" —
+ * survives every Cancellation and reboot and can be uncapped once per Episode to
+ * break that Episode's House Rule. Curveballs resolve with real audience agency:
+ * spend Ink to bend the vote your way, or ride out whatever the crowd decides.
+ *
  * There is no per-turn mod hook in this engine (see docs/CURIOUSER/ENGINE_MAP.md),
  * so these beats are triggered explicitly (a client button / the Host calling the
  * route), which is exactly the intended "panels/beats are gated" cadence.
@@ -24,8 +33,8 @@ const path = require('path');
 
 module.exports.meta = {
   name: 'Curiouser Economy',
-  version: '1.0.0',
-  description: 'Ratings / Legacy / Audience Favor meters + Episode stakes (Renewed/Cancelled), Curveballs, and Sponsors.'
+  version: '1.1.0',
+  description: 'Ratings / Legacy / Audience Favor meters + Episode stakes (Renewed/Cancelled), the Season arc (Legacy tiers → Finale → Off-Air walk/re-sign), the traveling pen, bendable Curveballs, and Sponsors.'
 };
 
 module.exports.configSchema = {
@@ -89,8 +98,37 @@ const SPONSORS = [
   { name: 'Mock Turtle Soup Co.', string: 'you well up with real tears at every goodbye', ink: 35 }
 ];
 
+// Legacy tiers — the season climb (System 3). The Legacy need bar (0–100) maps
+// to a status; crossing a threshold is a promotion the Host announces. Headliner
+// is the gate: reach it (and clear enough Episodes) and the Season Finale opens.
+const LEGACY_TIERS = [
+  { min: 0,  key: 'slush',     label: 'the slush pile', blurb: 'a nobody the audience hasn\'t bothered to name yet' },
+  { min: 25, key: 'midcard',   label: 'mid-card',       blurb: 'a working contestant with a face people half-remember' },
+  { min: 55, key: 'headliner', label: 'headliner',      blurb: 'a draw — they tune in for YOU now' },
+  { min: 82, key: 'legend',    label: 'legend',         blurb: 'the kind of name they teach the new contestants to fear' }
+];
+// How many Renewed Episodes in a season before the Finale can open (also gated on
+// reaching at least headliner Legacy). Kept small so a season is a session-length arc.
+const FINALE_AFTER = 3;
+
+// Curveballs that RESOLVE with a mechanical nudge and can be bent with Ink.
+// swing = the meter the audience is toying with; bendLine = what buying the bend does.
+const LIVE_CURVEBALLS = [
+  { id: 'crocodile_door', text: 'AUDIENCE VOTE: should the nearest door become a crocodile? The crowd is leaning yes, purely for the chaos.', bar: 'ratings', bendCost: 25, forLine: 'you talk the vote into a spectacle that flatters you — Ratings climb.', againstLine: 'the door grows teeth on a whim; you scramble and the crowd laughs AT you — Ratings dip.' },
+  { id: 'rain_vote', text: 'AUDIENCE VOTE: rain, yes or no? They already hate someone in the room and rain feels like justice.', bar: 'audience_favor', bendCost: 20, forLine: 'you make the downpour YOUR moment — the crowd falls for it, Favor rises.', againstLine: 'the rain lands on you instead of your target; the crowd\'s sympathy drifts elsewhere — Favor dips.' },
+  { id: 'voice_swap', text: 'AUDIENCE VOTE: swap two characters\' voices for the rest of the scene? The crowd loves a good humiliation.', bar: 'ratings', bendCost: 30, forLine: 'you weaponize the swap for a perfect bit — Ratings spike.', againstLine: 'you get swapped into a squeak mid-threat; the menace evaporates — Ratings dip.' },
+  { id: 'floor_lava', text: 'AUDIENCE VOTE: should the floor be lava, or merely disappointed in you? It\'s neck and neck.', bar: 'audience_favor', bendCost: 22, forLine: 'you turn the hazard into a victory lap — the crowd adores it, Favor rises.', againstLine: 'the floor picks "disappointed," and somehow that stings more — Favor dips.' },
+  { id: 'ex_contestant', text: 'WILDCARD: someone in this room is you, from a Cancelled season, and the audience just recognized them.', bar: 'ratings', bendCost: 28, forLine: 'you get ahead of the reveal and make it YOUR twist — Ratings surge.', againstLine: 'your dead-season double steals the scene; the crowd pivots to them — Ratings dip.' }
+];
+
 function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
 function randInt(min, max) { return min + Math.floor(Math.random() * (max - min + 1)); }
+function legacyTierFor(value) {
+  const v = Number.isFinite(value) ? value : 0;
+  let tier = LEGACY_TIERS[0];
+  for (const t of LEGACY_TIERS) { if (v >= t.min) tier = t; }
+  return tier;
+}
 
 module.exports.register = function register(scope) {
   const { modDir, modName, registerModRoute } = scope;
@@ -99,7 +137,17 @@ module.exports.register = function register(scope) {
   const stateFile = path.join(dataDir, 'curiouser-state.json');
 
   function defaultState() {
-    return { season: 1, episode: 0, format: null, onTheBubble: false, activeSponsor: null, cancelledCount: 0 };
+    return {
+      season: 1, episode: 0, format: null, onTheBubble: false, activeSponsor: null, cancelledCount: 0,
+      // Season arc
+      renewedThisSeason: 0, isFinale: false, awaitingOffAir: false, offAirCount: 0, legacyTierKey: null,
+      stakesTier: 0, // bumps each re-sign; raises Renewal Thresholds
+      // The traveling pen — the one prop "not in the format" that survives every
+      // reboot. Owned from the first Episode; uncap it once per Episode to break
+      // the House Rule. seasonsSurvived is the emotional odometer.
+      pen: { owned: true, uncappedThisEpisode: false, seasonsSurvived: 0, brokeRuleCount: 0 },
+      pendingCurveball: null
+    };
   }
   function loadState() {
     try {
@@ -156,6 +204,50 @@ module.exports.register = function register(scope) {
 
   // ---- Routes --------------------------------------------------------------
 
+  // Detect and announce a Legacy promotion/demotion since we last checked.
+  // Returns a Host line to append, or null. Mutates state.legacyTierKey.
+  function checkLegacyTier(player) {
+    const legacy = meterValue(player, 'legacy');
+    if (legacy === null) return null;
+    const tier = legacyTierFor(legacy);
+    const prevKey = state.legacyTierKey;
+    if (prevKey === tier.key) return null;
+    const prevIdx = LEGACY_TIERS.findIndex(t => t.key === prevKey);
+    const nextIdx = LEGACY_TIERS.findIndex(t => t.key === tier.key);
+    state.legacyTierKey = tier.key;
+    if (prevKey === null) return null; // first observation, no announcement
+    if (nextIdx > prevIdx) {
+      return `Get up here — you've climbed to ${tier.label}. ${tier.blurb[0].toUpperCase() + tier.blurb.slice(1)}. Legacy like that unlocks doors, contestant.`;
+    }
+    return `Ouch. That slide drops you back to ${tier.label} — ${tier.blurb}. The climb only counts if you hold the height.`;
+  }
+
+  function finaleEligible(player) {
+    if (state.isFinale || state.awaitingOffAir) return false;
+    const legacy = meterValue(player, 'legacy');
+    const tier = legacyTierFor(legacy);
+    const tierIdx = LEGACY_TIERS.findIndex(t => t.key === tier.key);
+    const headlinerIdx = LEGACY_TIERS.findIndex(t => t.key === 'headliner');
+    return state.renewedThisSeason >= FINALE_AFTER && tierIdx >= headlinerIdx;
+  }
+
+  function seasonSummary(player) {
+    const legacy = player ? meterValue(player, 'legacy') : null;
+    const tier = legacyTierFor(legacy);
+    return {
+      season: state.season,
+      renewedThisSeason: state.renewedThisSeason,
+      finaleAfter: FINALE_AFTER,
+      finaleEligible: player ? finaleEligible(player) : false,
+      isFinale: state.isFinale,
+      awaitingOffAir: state.awaitingOffAir,
+      offAirCount: state.offAirCount,
+      stakesTier: state.stakesTier,
+      legacyTier: { key: tier.key, label: tier.label },
+      pen: state.pen
+    };
+  }
+
   // GET /state — current season/episode/format/meters
   registerModRoute('get', '/state', (req, res) => {
     const player = activePlayer();
@@ -165,38 +257,59 @@ module.exports.register = function register(scope) {
       legacy: meterValue(player, 'legacy'),
       ink: typeof player.currency === 'number' ? player.currency : null
     } : null;
-    res.json({ success: true, state, meters });
+    res.json({ success: true, state, meters, season: player ? seasonSummary(player) : null });
   });
 
-  // POST /episode/roll — spin the Format dials and open a new Episode
+  // GET /season/state — the season arc at a glance (tiers, finale, off-air, pen)
+  registerModRoute('get', '/season/state', (req, res) => {
+    const player = activePlayer();
+    res.json({ success: true, season: player ? seasonSummary(player) : null });
+  });
+
+  // POST /episode/roll — spin the Format dials and open a new Episode. When the
+  // season has earned it (enough Renewals + headliner Legacy), this opens the
+  // SEASON FINALE instead: a harder bar, all-or-nothing, clearing it earns Off-Air.
   registerModRoute('post', '/episode/roll', (req, res) => {
-    if (!requireGame(res)) return;
+    const player = requireGame(res);
+    if (!player) return;
     const cfg = scope.modLoader.getModConfig(modName) || {};
     const tMin = Number.isFinite(cfg.renewalThresholdMin) ? cfg.renewalThresholdMin : 40;
     const tMax = Number.isFinite(cfg.renewalThresholdMax) ? cfg.renewalThresholdMax : 60;
+    // Each re-sign (stakesTier) raises the whole band; the Finale raises it more.
+    const tierBump = (state.stakesTier || 0) * 6;
 
+    const isFinale = finaleEligible(player);
     const setting = pick(FORMATS);
     // Bias toward a rule that BITES mechanically so the Format actually matters.
     const mechanicalRules = RULES.filter(r => r.mechanic);
     const ruleObj = (mechanicalRules.length && Math.random() < 0.65) ? pick(mechanicalRules) : pick(RULES);
     const rule = ruleObj.text;
-    const renewalThreshold = randInt(Math.min(tMin, tMax), Math.max(tMin, tMax));
+    let renewalThreshold = randInt(Math.min(tMin, tMax), Math.max(tMin, tMax)) + tierBump;
+    if (isFinale) renewalThreshold = Math.min(92, renewalThreshold + 20);
     const houseRules = [rule, pick(HOUSE_WILDCARDS), `Renewal Threshold: ${renewalThreshold}% Ratings by the climax.`];
 
     state.episode += 1;
-    state.format = { setting, rule, ruleBite: ruleObj.bite || null, houseRules, renewalThreshold };
+    state.isFinale = isFinale;
+    state.format = { setting, rule, ruleBite: ruleObj.bite || null, houseRules, renewalThreshold, isFinale };
     state.activeMechanic = ruleObj.mechanic || null;
     state.onTheBubble = false;
     state.activeSponsor = null;
+    if (state.pen) state.pen.uncappedThisEpisode = false; // the pen re-caps between Episodes
+    // Seed the tier label the first time so the next promotion can be announced.
+    if (state.legacyTierKey === null) state.legacyTierKey = legacyTierFor(meterValue(player, 'legacy')).key;
     saveState(state);
 
     const host = hostSay(
-      `Episode ${state.episode}. Format: ${setting}, and ${rule}. ` +
+      (isFinale
+        ? `SEASON ${state.season} FINALE. This is the one they'll remember you by. Format: ${setting}, and ${rule}. `
+        : `Episode ${state.episode}. Format: ${setting}, and ${rule}. `) +
       `House Rules: ${houseRules.join(' · ')} ` +
       (ruleObj.bite ? `And this one BITES: ${ruleObj.bite}. ` : '') +
-      `Hit ${renewalThreshold}% Ratings by the climax or you're on the bubble. Do something.`
+      (isFinale
+        ? `Clear ${renewalThreshold}% and you earn the Off-Air option — walk, or re-sign for higher stakes. Miss it and the whole climb burns. No pressure.`
+        : `Hit ${renewalThreshold}% Ratings by the climax or you're on the bubble. Do something.`)
     );
-    res.json({ success: true, state, host });
+    res.json({ success: true, state, host, isFinale });
   });
 
   // Deterministic House-Rule enforcement, off the player's own action text.
@@ -272,13 +385,25 @@ module.exports.register = function register(scope) {
       return res.status(409).json({ success: false, error: 'Ratings meter is not active on this character — confirm the Curiouser setting + economy mod are applied.' });
     }
     const threshold = currentThreshold();
+    const wasFinale = state.isFinale;
     let outcome, host;
 
     if (ratings >= threshold) {
-      outcome = 'renewed';
-      player.applyNeedBarChange('legacy', { direction: 'increase', magnitude: 'small', reason: 'Episode renewed' });
+      // Clearing a Finale doesn't just renew — it earns the Off-Air option.
+      player.applyNeedBarChange('legacy', { direction: 'increase', magnitude: wasFinale ? 'large' : 'small', reason: wasFinale ? 'Season finale cleared' : 'Episode renewed' });
       state.onTheBubble = false;
-      host = hostSay(`Renewed. ${Math.round(ratings)}% against a ${threshold}% bar — the audience wants more of you. Your Legacy ticks up. Next Episode when you're ready.`);
+      state.renewedThisSeason += 1;
+      const promo = checkLegacyTier(player);
+      if (wasFinale) {
+        outcome = 'offair_unlocked';
+        state.isFinale = false;
+        state.awaitingOffAir = true;
+        state.format = null;
+        host = hostSay(`YOU CLEARED THE FINALE. ${Math.round(ratings)}% against a ${threshold}% bar and the whole studio is on its feet. ${promo ? promo + ' ' : ''}Here's the prize almost nobody gets: the Off-Air option. Walk — end your own show, on your terms, like Del did — or re-sign for a harder, richer season. Your call, and only you get to make it.`);
+      } else {
+        outcome = 'renewed';
+        host = hostSay(`Renewed. ${Math.round(ratings)}% against a ${threshold}% bar — the audience wants more of you. Your Legacy ticks up${state.renewedThisSeason >= FINALE_AFTER ? ', and you\'re knocking on the Finale' : ''}. ${promo ? promo + ' ' : ''}Next Episode when you're ready.`);
+      }
     } else if (state.onTheBubble) {
       // The Prop Department's Panic Room (curiouser-workshop) can spend one
       // Reboot Insurance to soften a Cancellation. Cross-mod, same process;
@@ -289,15 +414,19 @@ module.exports.register = function register(scope) {
       if (panic && panic.saved) {
         outcome = 'reboot_insurance';
         state.onTheBubble = false;
+        state.isFinale = false;
         state.format = null;
-        host = hostSay(`CANCELLED — and then the Panic Room kicks in. Reboot Insurance cashes out: a trapdoor of your own making drops you clear and you land, gasping, in one piece. ${Math.round(ratings)}% against a ${threshold}% bar — should've been the end, but your Legacy holds and the Vault's still yours. Do NOT waste the reprieve.`);
+        host = hostSay(`CANCELLED — and then the Panic Room kicks in. Reboot Insurance cashes out: a trapdoor of your own making drops you clear and you land, gasping, in one piece. ${Math.round(ratings)}% against a ${threshold}% bar — should've been the end, but your Legacy holds and the Vault's still yours. The pen's still in your pocket. Do NOT waste the reprieve.`);
       } else {
         outcome = 'cancelled';
         player.applyNeedBarChange('legacy', { direction: 'decrease', magnitude: 'large', reason: 'Cancelled' });
         state.onTheBubble = false;
+        state.isFinale = false;
         state.format = null;
         state.cancelledCount += 1;
-        host = hostSay(`Cancelled. ${Math.round(ratings)}% and the bar was ${threshold}%. You're written out live — gloriously, the crowd's on its feet, half of them crying. Your Legacy burns. You can be rebooted at a lower tier: same soul, new season.`);
+        state.renewedThisSeason = 0; // the season's climb is broken
+        const demo = checkLegacyTier(player);
+        host = hostSay(`Cancelled. ${Math.round(ratings)}% and the bar was ${threshold}%. You're written out live — gloriously, the crowd's on its feet, half of them crying. Your Legacy burns and the season's climb resets. ${demo ? demo + ' ' : ''}One thing they can't take: the pen's still yours. You can be rebooted at a lower tier — same soul, new season.`);
       }
     } else {
       outcome = 'on_the_bubble';
@@ -309,13 +438,55 @@ module.exports.register = function register(scope) {
     res.json({ success: true, outcome, ratings, threshold, state, host });
   });
 
-  // POST /curveball — roll live chaos (audience vote or wildcard)
+  function inkOf(player) {
+    return typeof player.getCurrency === 'function' ? (player.getCurrency() || 0)
+      : (typeof player.currency === 'number' ? player.currency : 0);
+  }
+
+  // POST /curveball — throw live chaos the audience actually decides. Returns a
+  // resolvable curveball with a bend cost; the player answers via /curveball/resolve
+  // (spend Ink to bend it your way, or ride out whatever the crowd wants).
   registerModRoute('post', '/curveball', (req, res) => {
-    if (!requireGame(res)) return;
-    const type = Math.random() < 0.5 ? 'audience_vote' : 'wildcard';
-    const line = pick(CURVEBALLS[type]);
-    const host = hostSay(line);
-    res.json({ success: true, type, host });
+    const player = requireGame(res);
+    if (!player) return;
+    const cb = pick(LIVE_CURVEBALLS);
+    state.pendingCurveball = { id: cb.id, bar: cb.bar, bendCost: cb.bendCost, forLine: cb.forLine, againstLine: cb.againstLine };
+    saveState(state);
+    const host = hostSay(`${cb.text} You can spend ${cb.bendCost} Ink to bend it your way, or ride out whatever they vote.`);
+    res.json({ success: true, curveball: { id: cb.id, text: cb.text, bendCost: cb.bendCost, canAfford: inkOf(player) >= cb.bendCost }, host });
+  });
+
+  // POST /curveball/resolve — { bend: bool }. Bend spends Ink for a favorable
+  // swing; otherwise the audience's whim lands (a coin-flip nudge, usually against).
+  registerModRoute('post', '/curveball/resolve', (req, res) => {
+    const player = requireGame(res);
+    if (!player) return;
+    const cb = state.pendingCurveball;
+    if (!cb) return res.status(409).json({ success: false, error: 'No curveball in play — POST /curveball first.' });
+    const wantBend = !!(req.body && req.body.bend);
+    const bar = (id, dir, mag, reason) => { try { player.applyNeedBarChange(id, { direction: dir, magnitude: mag, reason }); } catch (e) {} };
+    let host, bent = false;
+    if (wantBend) {
+      const have = inkOf(player);
+      if (have < cb.bendCost) {
+        // Can't cover it — the bend fizzles and the crowd smells desperation.
+        bar(cb.bar, 'decrease', 'small', 'Curveball bend failed');
+        host = hostSay(`You reach for the Ink to bend it — and you're ${cb.bendCost - have} short. The crowd SEES the flinch. ${cb.againstLine}`);
+      } else {
+        if (typeof player.adjustCurrency === 'function') player.adjustCurrency(-cb.bendCost);
+        bar(cb.bar, 'increase', 'small', 'Curveball bent');
+        bent = true;
+        host = hostSay(`You spend ${cb.bendCost} Ink and bend the vote — ${cb.forLine} Money well burned.`);
+      }
+    } else {
+      // Ride it out: the audience does what it wants. Slight house edge against you.
+      const favorsYou = Math.random() < 0.35;
+      if (favorsYou) { bar(cb.bar, 'increase', 'small', 'Curveball rode out well'); host = hostSay(`You ride it out — and the vote breaks YOUR way, free of charge. ${cb.forLine}`); }
+      else { bar(cb.bar, 'decrease', 'small', 'Curveball rode out badly'); host = hostSay(`You let the crowd decide. Bold. ${cb.againstLine}`); }
+    }
+    state.pendingCurveball = null;
+    saveState(state);
+    res.json({ success: true, bent, host });
   });
 
   // POST /sponsor — offer a sponsor (string attached)
@@ -367,5 +538,88 @@ module.exports.register = function register(scope) {
     res.json({ success: true, declined: sponsor ? sponsor.name : null, host });
   });
 
-  console.log(`      🎪 Curiouser Economy mod loaded (Ratings/Favor/Legacy + Episode stakes)`);
+  // ---- Off-Air: the finale prize (walk, or re-sign for higher stakes) --------
+
+  // POST /offair/walk — the rare win. End your own show, on your terms.
+  registerModRoute('post', '/offair/walk', (req, res) => {
+    const player = requireGame(res);
+    if (!player) return;
+    if (!state.awaitingOffAir) {
+      return res.status(409).json({ success: false, error: 'The Off-Air option isn\'t on the table — clear a Season Finale first.' });
+    }
+    state.awaitingOffAir = false;
+    state.offAirCount += 1;
+    state.format = null;
+    state.isFinale = false;
+    // Walking off ends this show. If play continues, it's a fresh climb — reset
+    // the season's progress (but not the stakesTier; that's the re-sign's bargain).
+    state.season += 1;
+    state.renewedThisSeason = 0;
+    if (state.pen) state.pen.seasonsSurvived += 1;
+    saveState(state);
+    const host = hostSay(
+      `You walk. You actually WALK. The lights follow you to the edge of the stage and then — nothing, no format, no bar, no bit. Just you, the pen, and a door that opens onto somewhere the show can't broadcast. The audience is silent, then it's ROARING, because almost nobody does this. Del did. Now you. Season ${state.season}: yours. Off-Air. Credits roll. Whatever's next, you chose it.`
+    );
+    res.json({ success: true, outcome: 'walked_off', season: seasonSummary(player), host });
+  });
+
+  // POST /offair/resign — re-sign for a new, harder, richer season.
+  registerModRoute('post', '/offair/resign', (req, res) => {
+    const player = requireGame(res);
+    if (!player) return;
+    if (!state.awaitingOffAir) {
+      return res.status(409).json({ success: false, error: 'Nothing to re-sign for — clear a Season Finale first.' });
+    }
+    state.awaitingOffAir = false;
+    state.season += 1;
+    state.renewedThisSeason = 0;
+    state.stakesTier += 1;
+    state.isFinale = false;
+    state.format = null;
+    if (state.pen) state.pen.seasonsSurvived += 1;
+    // A re-sign bonus: the network pays to keep a proven draw.
+    if (typeof player.adjustCurrency === 'function') player.adjustCurrency(75 + state.stakesTier * 25);
+    saveState(state);
+    const host = hostSay(
+      `You re-sign. Of course you do — the pen's not done with you yet. Season ${state.season}, and the network's raised the bar to match your name: bigger Ink up front, meaner Renewal Thresholds, sharper Curveballs. The slush pile is a rumor now. Let's give them a season they'll syndicate. Roll the first Episode when you're ready.`
+    );
+    res.json({ success: true, outcome: 'resigned', season: seasonSummary(player), host });
+  });
+
+  // ---- The traveling pen — the prop "not in the format" ----------------------
+
+  // GET /pen/state — is the pen capped, and how much has it survived?
+  registerModRoute('get', '/pen/state', (req, res) => {
+    res.json({ success: true, pen: state.pen, hasEpisode: !!state.format });
+  });
+
+  // POST /pen/uncap — break THIS Episode's House Rule, once. The pen is the one
+  // prop that isn't in the format; uncapping it voids the active mechanical bite
+  // for the rest of the Episode.
+  registerModRoute('post', '/pen/uncap', (req, res) => {
+    const player = requireGame(res);
+    if (!player) return;
+    if (!state.pen || !state.pen.owned) {
+      return res.status(409).json({ success: false, error: 'You\'re not holding the pen.' });
+    }
+    if (!state.format) {
+      return res.status(409).json({ success: false, error: 'No Episode in progress — there\'s no rule to break yet.' });
+    }
+    if (state.pen.uncappedThisEpisode) {
+      return res.status(409).json({ success: false, error: 'The pen\'s already run dry this Episode — it re-caps between Episodes.', host: hostSay(`The pen sputters — you already spent it this Episode. It only breaks the format once, and you already did. It'll be ready next Episode.`) });
+    }
+    const hadBite = !!state.activeMechanic;
+    state.activeMechanic = null; // the format's mechanical bite is voided for the rest of the Episode
+    state.pen.uncappedThisEpisode = true;
+    state.pen.brokeRuleCount += 1;
+    saveState(state);
+    const host = hostSay(
+      hadBite
+        ? `You uncap the pen. It isn't in the format — that's the whole point of it — and the House Rule just... stops applying to you. The Host's eye twitches. "That's cheating." Yeah. It is. The bite's off for the rest of the Episode. Spend the reprieve well.`
+        : `You uncap the pen and press it to the air. There's no mechanical rule biting this Episode, so it's mostly theater — but the audience LOVES the gesture, and the Host pretends not to notice you carrying a prop that shouldn't exist.`
+    );
+    res.json({ success: true, brokeRule: hadBite, pen: state.pen, host });
+  });
+
+  console.log(`      🎪 Curiouser Economy mod loaded (Ratings/Favor/Legacy + Episode stakes + Season arc + the pen)`);
 };
