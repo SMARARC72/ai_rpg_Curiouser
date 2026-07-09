@@ -25,8 +25,10 @@ mods/scene-illustrations/data/*
 !mods/curiouser-economy/
 !mods/curiouser-comic/
 !mods/curiouser-theme/
+!mods/curiouser-workshop/
 mods/curiouser-economy/data/
 mods/curiouser-comic/data/
+mods/curiouser-workshop/data/
 imagegen/qwen_image_2512_nova.json
 imagegen/qwen_image_2512_nova.json.njk
 # Lorebook state and data
