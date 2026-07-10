@@ -12383,6 +12383,31 @@ module.exports = function registerApiRoutes(scope) {
             } = requestBody;
             const stream = createStreamEmitter({ clientId: rawClientId, requestId: rawRequestId });
             Globals.currentPlayer = currentPlayer;
+
+            // Precondition: a playable game must be loaded before a turn can run.
+            // Without one — a fresh boot, a New Game still generating its world, or
+            // a game that failed to create — downstream player-location retrieval
+            // throws and used to surface as a scary 500 Internal Server Error. This
+            // is an expected, recoverable state, not a server fault: return a clear
+            // message the chat shows inline, with a 2xx so the browser doesn't log
+            // it as a failed request.
+            let hasPlayableGame = false;
+            try {
+                hasPlayableGame = Boolean(Globals.gameLoaded)
+                    && !!currentPlayer
+                    && !!currentPlayer.currentLocation
+                    && (typeof gameLocations?.has !== 'function' || gameLocations.has(currentPlayer.currentLocation));
+            } catch (preconditionError) {
+                hasPlayableGame = false;
+            }
+            if (!hasPlayableGame) {
+                return res.status(200).json({
+                    error: 'No active game yet — start a New Game or load a save first. If you just hit New Game, give the world a few seconds to finish building, then try again.',
+                    needsGame: true,
+                    gameLoaded: Boolean(Globals.gameLoaded)
+                });
+            }
+
             let corpseProcessingRan = false;
             Globals.processedMove = false;
             let currentUserMessage = null;
@@ -12497,7 +12522,13 @@ module.exports = function registerApiRoutes(scope) {
             catch (error) {
                 console.warn('Error during initial player location retrieval:', error.message);
                 console.debug(error);
-                return res.status(500).json({ error: 'Failed to retrieve player location. You need to start or load a game first.' });
+                // Precondition failure, not a server fault — surface it the same
+                // graceful way as the early guard (2xx so it isn't a console 500).
+                return res.status(200).json({
+                    error: 'No active game yet — start a New Game or load a save first. If you just hit New Game, give the world a few seconds to finish building, then try again.',
+                    needsGame: true,
+                    gameLoaded: Boolean(Globals.gameLoaded)
+                });
             }
 
             let locationMemoriesProcessed = false;

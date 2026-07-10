@@ -6770,7 +6770,10 @@ class AIRPGChat {
             if (data.error) {
                 this.hideLoading(requestId);
                 if (!pendingAbilitySelection) {
-                    this.addMessage('system', `Error: ${data.error}`, true);
+                    // "No active game yet" is recoverable guidance, not a fault —
+                    // show it plainly, without the alarming "Error:" prefix.
+                    const prefix = data.needsGame ? '' : 'Error: ';
+                    this.addMessage('system', `${prefix}${data.error}`, true);
                 }
                 finalizeMode = 'immediate';
             } else {
