@@ -30840,8 +30840,16 @@ module.exports = function registerApiRoutes(scope) {
                     case 'npc': {
                         entity = players.get(entityId);
                         if (!entity) {
-                            return res.status(404).json({
+                            // During new-game world generation the players map is
+                            // cleared and rebuilt, so a portrait can be requested a
+                            // beat before the entity commits (or for the just-cleared
+                            // previous game). Return a soft 2xx skip rather than a 404
+                            // the browser logs as a failed resource; the client retries
+                            // and a later render picks it up once the entity exists.
+                            return res.status(200).json({
                                 success: false,
+                                skipped: true,
+                                reason: 'entity_not_ready',
                                 error: `Player with ID '${entityId}' not found`
                             });
                         }
@@ -30853,8 +30861,12 @@ module.exports = function registerApiRoutes(scope) {
                     case 'location': {
                         entity = gameLocations.get(entityId);
                         if (!entity) {
-                            return res.status(404).json({
+                            // Same new-game race as players: soft-skip (2xx) instead
+                            // of a browser-logged 404 while the world is rebuilding.
+                            return res.status(200).json({
                                 success: false,
+                                skipped: true,
+                                reason: 'entity_not_ready',
                                 error: `Location with ID '${entityId}' not found`
                             });
                         }
@@ -30867,8 +30879,10 @@ module.exports = function registerApiRoutes(scope) {
                     case 'location_exit': {
                         entity = gameLocationExits.get(entityId);
                         if (!entity) {
-                            return res.status(404).json({
+                            return res.status(200).json({
                                 success: false,
+                                skipped: true,
+                                reason: 'entity_not_ready',
                                 error: `Location exit with ID '${entityId}' not found`
                             });
                         }
@@ -30882,8 +30896,10 @@ module.exports = function registerApiRoutes(scope) {
                     case 'scenery': {
                         entity = things.get(entityId);
                         if (!entity) {
-                            return res.status(404).json({
+                            return res.status(200).json({
                                 success: false,
+                                skipped: true,
+                                reason: 'entity_not_ready',
                                 error: `Thing with ID '${entityId}' not found`
                             });
                         }
@@ -30906,11 +30922,28 @@ module.exports = function registerApiRoutes(scope) {
                     });
                 }
 
-                const generationResult = await generator({ force: Boolean(force), clientId });
+                // Auto-render fires these in the background; an image-backend or
+                // config failure shouldn't surface as a console 500. Log the real
+                // reason server-side (visible in the deploy logs) and return a soft
+                // 2xx skip the browser won't flag, with the reason in the body.
+                let generationResult;
+                try {
+                    generationResult = await generator({ force: Boolean(force), clientId });
+                } catch (genError) {
+                    console.warn(`Image generation for ${resolvedType} '${entityId}' failed:`, genError && genError.message ? genError.message : genError);
+                    return res.status(202).json({
+                        success: false,
+                        skipped: true,
+                        reason: 'generation_error',
+                        error: genError && genError.message ? genError.message : String(genError)
+                    });
+                }
 
                 if (!generationResult) {
-                    return res.status(500).json({
+                    return res.status(202).json({
                         success: false,
+                        skipped: true,
+                        reason: 'generation_error',
                         error: 'Image generation did not return a result'
                     });
                 }

@@ -99,9 +99,13 @@
 
         data = await response.json().catch(() => ({}));
 
-        const entityNotReady = response.status === 404
-          && typeof data?.error === 'string'
-          && /not found/i.test(data.error);
+        // The server returns a soft 2xx skip with reason 'entity_not_ready' while
+        // a new game is still committing entities (older builds sent a 404 for
+        // this); either way, retry a few times so the image loads once it exists.
+        const entityNotReady = data?.reason === 'entity_not_ready'
+          || (response.status === 404
+            && typeof data?.error === 'string'
+            && /not found/i.test(data.error));
 
         if (!entityNotReady) {
           break;
