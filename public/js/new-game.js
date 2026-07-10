@@ -816,24 +816,34 @@ document.addEventListener('DOMContentLoaded', () => {
           payload.skills = skills;
         }
 
-        fetch('/api/new-game', {
+        // Await the build instead of firing-and-forgetting then navigating away.
+        // The server streams progress over THIS page's WebSocket (clientId) and
+        // signals "ready" the same way; navigating early orphaned that stream —
+        // the freshly loaded index page gets a new clientId and never heard the
+        // ready signal, so the game finished on the server but the UI never
+        // transitioned. Staying here keeps the overlay's live progress, and we
+        // navigate only once the game is fully built, so the adventure view
+        // renders the ready state.
+        const response = await fetch('/api/new-game', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          keepalive: true
-        }).then(async (response) => {
-          const result = await response.json().catch(() => ({}));
-          if (!response.ok || !result?.success) {
-            const errMsg = result?.details || result?.error || `Server error (${response.status})`;
-            console.error(`New game creation failed: ${errMsg}`);
-          }
-        }).catch((err) => {
-          console.error(`New game creation failed: ${err?.message || err}`);
+          body: JSON.stringify(payload)
         });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result?.success) {
+          const errMsg = result?.details || result?.error || `Server error (${response.status})`;
+          console.error(`New game creation failed: ${errMsg}`);
+          setOverlayText(`Couldn't start the game: ${errMsg}. Close this and try again.`);
+          realtimeState.activeRequestId = null;
+          setFormEnabled(true);
+          return;
+        }
 
+        // Fully built server-side now — go to the adventure view.
         window.location.assign('/#tab-adventure');
       } catch (err) {
         console.error(`Failed to submit new game request: ${err?.message || err}`);
+        setOverlayText(`Couldn't start the game: ${err?.message || err}. Close this and try again.`);
         realtimeState.activeRequestId = null;
         hideOverlay();
         setFormEnabled(true);
